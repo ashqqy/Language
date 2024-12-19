@@ -1,0 +1,19 @@
+//---------------------------------------------------------------
+
+int Factorial (int num)
+{
+    if (num != 1)
+    {
+        return num * Factorial (num - 1);
+    }
+
+    else
+    {
+        return 1;
+    }
+}
+
+int factorial = Factorial (5);
+printf (factorial);
+
+//---------------------------------------------------------------

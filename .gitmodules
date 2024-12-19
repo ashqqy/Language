@@ -1,3 +1,6 @@
 [submodule "Custom-Assert"]
 	path = Custom-Assert
 	url = https://github.com/ashqqy/Custom-Assert
+[submodule "Files-Reading"]
+	path = Files-Reading
+	url = https://github.com/ashqqy/Files-Reading
