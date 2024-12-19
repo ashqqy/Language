@@ -86,6 +86,7 @@ void TreeDump (tree_node_t* root_node)
     CustomAssert (root_node != NULL);
 
     FILE* dump_file = fopen ("./Dump/dump.dot", "w");
+    CustomWarning (dump_file != NULL, ;);
 
     fprintf (dump_file, "digraph G\n");
     fprintf (dump_file, "{\n");

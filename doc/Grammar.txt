@@ -1,7 +1,7 @@
 <Program> ::= <VariableInit> <Program> | <VariableInit>
 
 <VariableInit> ::= <Type> <Assignment> | <Assignment>
-<Assignment> ::= <Name> "=" <Number>
+<Assignment> ::= <Name> "=" <Number> ";"
 
 <Type> ::= "int" | "double"
 

@@ -1,0 +1,15 @@
+digraph G
+{
+node[shape="record", style="rounded, filled"];
+
+p0x504000000110[label = "{ <ptr> 0x504000000110 | <type> RESERVED | <data> ; | { <l>left|<r>right } }"];
+p0x504000000010[label = "{ <ptr> 0x504000000010 | <type> RESERVED | <data> int | { <l>left|<r>right } }"];
+p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> RESERVED | <data> = | { <l>left|<r>right } }"];
+p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> NAME | <data> name_len = 1 | { <l>left|<r>right } }"];
+p0x5040000000d0[label = "{ <ptr> 0x5040000000d0 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
+
+p0x504000000110:<l> -> p0x504000000010
+p0x504000000010:<l> -> p0x504000000090
+p0x504000000090:<l> -> p0x504000000050
+p0x504000000090:<r> -> p0x5040000000d0
+}

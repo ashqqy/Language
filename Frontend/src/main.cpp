@@ -5,6 +5,7 @@
 #include "CustomAssert.h"
 
 #include "Tokenization.h"
+#include "Parce.h"
 
 //----------------------------------------------------------------------------
 
@@ -20,7 +21,10 @@ int main ()
 
     tree_node_t** token_array = Tokenization (buf, buf_size);
 
-    printf ("[tkn_arr = %p];\n", token_array);
+    size_t shift = 0;
+    tree_node_t* root_node = GetProgram (token_array, &shift);
+
+    TreeDump (root_node);
 
     TokenArrayDestroy (token_array);
     free (buf); buf = NULL;

@@ -92,7 +92,7 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
             SyntaxError ("Unexpected character");
     }
 
-    tree_data_t token_data = {.type = RESERVED, .content.reserved = END};
+    tree_data_t token_data = {.type = RESERVED, .content = {.reserved = END}};
     TOKEN_INIT_ (token_data);
 
     return token_array;
