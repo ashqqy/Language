@@ -29,7 +29,7 @@ tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift)
     tree_node_t* root_node = GetStatement (token_array, shift);
     tree_node_t* join_node = root_node;
 
-    while (TKN_DATA_ (content.reserved) != END)
+    while (TKN_DATA_ (type) != RESERVED || TKN_DATA_ (content.reserved) != END)
     {
         tree_node_t* next_node = GetStatement (token_array, shift);
         NodeLink (next_node, &join_node->right);
@@ -64,7 +64,17 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
     tree_node_t* bool_node = GetBool (token_array, shift);
     GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
     GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
+
     tree_node_t* statement_node = GetStatement (token_array, shift);
+    tree_node_t* join_node = statement_node;
+
+    while (TKN_DATA_ (type) != RESERVED || TKN_DATA_ (content.reserved) != RCURBR)
+    {
+        tree_node_t* next_node = GetStatement (token_array, shift);
+        NodeLink (next_node, &join_node->right);
+        join_node = next_node;
+    }
+
     GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
 
     // не используются
