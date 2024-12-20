@@ -137,7 +137,7 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
 
         case RESERVED:
         {
-            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %s | { <l>left|<r>right } }\"];\n", 
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> \\%s | { <l>left|<r>right } }\"];\n", 
                     node, node, "RESERVED", node_data);
             break;
         }
@@ -167,3 +167,68 @@ void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node)
 }
 
 //------------------------------------------------------
+
+void TreeArrayDump (tree_node_t** array)
+{
+    CustomAssert (array != NULL);
+
+    FILE* dump_file = fopen ("./Dump/dump.dot", "w");
+    CustomWarning (dump_file != NULL, ;);
+
+    fprintf (dump_file, "digraph G\n");
+    fprintf (dump_file, "{\n");
+    fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+
+    // определяем узлы 
+    int i = 0;
+    while (!(array[i]->data.type == RESERVED && array[i]->data.content.reserved == END))
+    {
+        TreeNodeDescrArrayDump (dump_file, array[i]);
+        i++;
+    }
+
+    fprintf (dump_file, "\n");
+
+    fprintf (dump_file, "}\n");
+
+    fclose (dump_file);
+
+    const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png"; // linux
+    // const char command[81] = "\"C:/Program Files/Graphviz/bin/dot.exe\" ./dump/dump.dot -Tpng -o ./dump/dump.png"; // windows
+    system(command);
+}
+
+void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
+{
+    CustomAssert (dump_file != NULL);
+
+    const char* node_data = FindReservedNameByData (node->data);
+
+    switch (node->data.type)
+    {
+        case NUMBER: 
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
+                    node, node, "NUMBER", node->data.content.number);
+            break;
+        }
+
+        case NAME:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> name_len = %lu | { <l>left|<r>right } }\"];\n", 
+                    node, node, "NAME", node->data.content.name.len);
+            break;
+        }
+
+        case RESERVED:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> \\%s | { <l>left|<r>right } }\"];\n", 
+                    node, node, "RESERVED", node_data);
+            break;
+        }
+
+        default: 
+            break;
+    }
+}
+

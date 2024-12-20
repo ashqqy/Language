@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "FilesReading.h"
 #include "Common.h"

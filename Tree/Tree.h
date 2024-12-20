@@ -25,6 +25,8 @@ void TreeDestroy (tree_node_t* node);
 void TreeDump (tree_node_t* root_node);
 void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node);
 void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node);
+void TreeArrayDump (tree_node_t** array);
+void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node);
 
 //--------------------------------------------------------------------------
 

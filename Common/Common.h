@@ -34,24 +34,26 @@ enum reserved_t
 
     LBRACK  = 8,
     RBRACK  = 9,
-    SEMI    = 10,
+    LCURBR  = 10,
+    RCURBR  = 11,
+    SEMI    = 12,
 
-    INT     = 11,
-    DBL     = 12,
+    INT     = 13,
+    DBL     = 14,
 
-    OR      = 13,
-    AND     = 14,
-    NOT     = 15,
+    OR      = 15,
+    AND     = 16,
+    NOT     = 17,
 
-    EQ      = 16,
-    NEQ     = 17,
-    GT      = 18,
-    LT      = 19,
-    GTE     = 20,
-    LTE     = 21,
+    EQ      = 18,
+    NEQ     = 19,
+    GT      = 20,
+    LT      = 21,
+    GTE     = 22,
+    LTE     = 23,
 
-    IF      = 22,
-    ELSE    = 23
+    IF      = 24,
+    ELSE    = 25
 };
 
 struct tree_data_t
@@ -76,18 +78,9 @@ const reserved_names_t reserved_names[] =
 {
     {.name = "(",  .data = {.type = RESERVED, .content = {.reserved = LBRACK}}},
     {.name = ")",  .data = {.type = RESERVED, .content = {.reserved = RBRACK}}},
+    {.name = "{",  .data = {.type = RESERVED, .content = {.reserved = LCURBR}}},
+    {.name = "}",  .data = {.type = RESERVED, .content = {.reserved = RCURBR}}},
     {.name = ";",  .data = {.type = RESERVED, .content = {.reserved = SEMI}}},
-
-    {.name = "||",  .data = {.type = RESERVED, .content = {.reserved = OR}}},
-    {.name = "&&",  .data = {.type = RESERVED, .content = {.reserved = AND}}},
-    {.name = "!",  .data = {.type = RESERVED, .content = {.reserved = NOT}}},
-
-    {.name = "==",  .data = {.type = RESERVED, .content = {.reserved = EQ}}},
-    {.name = "!=",  .data = {.type = RESERVED, .content = {.reserved = NEQ}}},
-    {.name = "<=",  .data = {.type = RESERVED, .content = {.reserved = LTE}}},
-    {.name = ">=",  .data = {.type = RESERVED, .content = {.reserved = GTE}}},
-    {.name = "<",  .data = {.type = RESERVED, .content = {.reserved = LT}}},
-    {.name = ">",  .data = {.type = RESERVED, .content = {.reserved = GT}}},
 
     {.name = "=",  .data = {.type = RESERVED, .content = {.reserved = ASG}}},
 
@@ -96,6 +89,17 @@ const reserved_names_t reserved_names[] =
     {.name = "*",  .data = {.type = RESERVED, .content = {.reserved = MUL}}},
     {.name = "/",  .data = {.type = RESERVED, .content = {.reserved = DIV}}},
     {.name = "^",  .data = {.type = RESERVED, .content = {.reserved = DEG}}},
+
+    {.name = "<",  .data = {.type = RESERVED, .content = {.reserved = LT}}},
+    {.name = ">",  .data = {.type = RESERVED, .content = {.reserved = GT}}},
+    {.name = "==",  .data = {.type = RESERVED, .content = {.reserved = EQ}}},
+    {.name = "!=",  .data = {.type = RESERVED, .content = {.reserved = NEQ}}},
+    {.name = "<=",  .data = {.type = RESERVED, .content = {.reserved = LTE}}},
+    {.name = ">=",  .data = {.type = RESERVED, .content = {.reserved = GTE}}},
+
+    {.name = "||",  .data = {.type = RESERVED, .content = {.reserved = OR}}},
+    {.name = "&&",  .data = {.type = RESERVED, .content = {.reserved = AND}}},
+    {.name = "!",  .data = {.type = RESERVED, .content = {.reserved = NOT}}},
 
     {.name = "int",  .data = {.type = RESERVED, .content = {.reserved = INT}}},
     {.name = "double",  .data = {.type = RESERVED, .content = {.reserved = DBL}}},

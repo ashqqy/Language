@@ -5,17 +5,21 @@
 
 #define TKN_DATA_(section) token_array[*shift]->data.section
 
-#define GET_RESERVED_(reserved_token, return_null, expected)                            \
+#define GET_RESERVED_(reserved_token, node_name, return_null, expected)                 \
+    tree_node_t* node_name = NULL;                                                      \
     if (TKN_DATA_ (type) == RESERVED && TKN_DATA_ (content.reserved) == reserved_token) \
     {                                                                                   \
-        tree_node_t* reserved_token_node = token_array[*shift];                         \
+        node_name = token_array[*shift];                                                \
         *shift += 1;                                                                    \
-        return reserved_token_node;                                                     \
     }                                                                                   \
     else if (return_null)                                                               \
-        return NULL;                                                                    \
+    {                                                                                   \
+        return node_name;                                                               \
+    }                                                                                   \
     else                                                                                \
-        SyntaxError ("Expected" "'" #expected "'")                                      \
+    {                                                                                   \
+        SyntaxError ("Expected " #expected);                                            \
+    }
 
 tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift)
 {
@@ -55,41 +59,21 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
 
-    GET_RESERVED_ (IF, 1, "if");
-
-    // tree_node_t* if_node = NULL;
-    // if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == IF))
-    // {
-    //     if_node = token_array[*shift];
-    //     *shift += 1;
-    // }
-    // else
-    //     return NULL;
-
-    GET_RESERVED_ (LBRACK, 0, "(");
-
-    // tree_node_t* lbr_node = NULL;
-    // if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == LBRACK))
-    // {
-    //     lbr_node = token_array[*shift];
-    //     *shift += 1;
-    // }
-    // else
-    //     SyntaxError ("Expected '('");
-
+    GET_RESERVED_ (IF, if_node, 1, 'if');
+    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
     tree_node_t* bool_node = GetBool (token_array, shift);
+    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
+    GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
+    tree_node_t* statement_node = GetStatement (token_array, shift);
+    GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
 
-    GET_RESERVED_ (RBRACK, 0, ")");
+    // не используются
+    lbrack_node = NULL; rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
 
-    // tree_node_t* rbr_node = NULL;
-    // if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == RBRACK))
-    // {
-    //     rbr_node = token_array[*shift];
-    //     *shift += 1;
-    // }
-    // else
-    //     SyntaxError ("Expected ')'");
+    NodeLink (bool_node, &if_node->left);
+    NodeLink (statement_node, &if_node->right);
 
+    return if_node;
 }
 
 tree_node_t* GetBool (tree_node_t** token_array, size_t* shift)
@@ -128,11 +112,11 @@ tree_node_t* GetCompare (tree_node_t** token_array, size_t* shift)
     if ((TKN_DATA_ (type) == RESERVED) &&      
         (TKN_DATA_ (content.reserved) == EQ  || TKN_DATA_ (content.reserved) == NEQ ||
          TKN_DATA_ (content.reserved) == LTE || TKN_DATA_ (content.reserved) == GTE || 
-         TKN_DATA_ (content.reserved) == LT  ||
-         TKN_DATA_ (content.reserved) == GT))
+         TKN_DATA_ (content.reserved) == LT  || TKN_DATA_ (content.reserved) == GT))
     {
         tree_node_t* comp_node = token_array[*shift];
         *shift += 1;
+        return comp_node;
     }
 
     else
@@ -183,11 +167,15 @@ tree_node_t* GetAsg (tree_node_t** token_array, size_t* shift)
     CustomAssert (shift       != NULL);
 
     tree_node_t* name_node = GetName (token_array, shift);
-    tree_node_t* asg_node  = GetEql (token_array, shift);
+
+    GET_RESERVED_ (ASG, asg_node, 0, '=');
+
     tree_node_t* num_node  = GetNum (token_array, shift);
+
     if (num_node == NULL)
         SyntaxError ("Number asg error");
-    tree_node_t* semi_node = GetSemi (token_array, shift);
+    GET_RESERVED_ (SEMI, semi_node, 0, ';');
+
 
     NodeLink (asg_node, &semi_node->left);
     NodeLink (name_node, &asg_node->left);
@@ -209,21 +197,6 @@ tree_node_t* GetName (tree_node_t** token_array, size_t* shift)
     }
     else
         SyntaxError ("Name Error");
-}
-
-tree_node_t* GetEql (tree_node_t** token_array, size_t* shift)
-{
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
-
-    if (TKN_DATA_ (type) == RESERVED && TKN_DATA_ (content.reserved) == ASG)
-    {
-        tree_node_t* eql_node = token_array[*shift];
-        *shift += 1;
-        return eql_node;
-    }
-    else
-        SyntaxError ("Expected '='");
 }
 
 tree_node_t* GetNum (tree_node_t** token_array, size_t* shift)
@@ -256,21 +229,6 @@ tree_node_t* GetNum (tree_node_t** token_array, size_t* shift)
 
     else
         return NULL;
-}
-
-tree_node_t* GetSemi (tree_node_t** token_array, size_t* shift)
-{
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
-
-    if (TKN_DATA_ (type) == RESERVED && TKN_DATA_ (content.reserved) == SEMI)
-    {
-        tree_node_t* semi_node = token_array[*shift];
-        *shift += 1;
-        return semi_node;
-    }
-    else
-        SyntaxError ("Expected ';'");
 }
 
 #undef TKN_DATA_
