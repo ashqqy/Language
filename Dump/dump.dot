@@ -3,13 +3,33 @@ digraph G
 node[shape="record", style="rounded, filled"];
 
 p0x504000000110[label = "{ <ptr> 0x504000000110 | <type> RESERVED | <data> ; | { <l>left|<r>right } }"];
-p0x504000000010[label = "{ <ptr> 0x504000000010 | <type> RESERVED | <data> int | { <l>left|<r>right } }"];
-p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> RESERVED | <data> = | { <l>left|<r>right } }"];
-p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> NAME | <data> name_len = 1 | { <l>left|<r>right } }"];
+p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> RESERVED | <data> = | { <l>left|<r>right } }"];
+p0x504000000010[label = "{ <ptr> 0x504000000010 | <type> NAME | <data> name_len = 1 | { <l>left|<r>right } }"];
+p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> RESERVED | <data> - | { <l>left|<r>right } }"];
 p0x5040000000d0[label = "{ <ptr> 0x5040000000d0 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
+p0x504000000250[label = "{ <ptr> 0x504000000250 | <type> RESERVED | <data> ; | { <l>left|<r>right } }"];
+p0x504000000150[label = "{ <ptr> 0x504000000150 | <type> RESERVED | <data> int | { <l>left|<r>right } }"];
+p0x5040000001d0[label = "{ <ptr> 0x5040000001d0 | <type> RESERVED | <data> = | { <l>left|<r>right } }"];
+p0x504000000190[label = "{ <ptr> 0x504000000190 | <type> NAME | <data> name_len = 2 | { <l>left|<r>right } }"];
+p0x504000000210[label = "{ <ptr> 0x504000000210 | <type> NUMBER | <data> 10 | { <l>left|<r>right } }"];
+p0x504000000390[label = "{ <ptr> 0x504000000390 | <type> RESERVED | <data> ; | { <l>left|<r>right } }"];
+p0x504000000290[label = "{ <ptr> 0x504000000290 | <type> RESERVED | <data> int | { <l>left|<r>right } }"];
+p0x504000000310[label = "{ <ptr> 0x504000000310 | <type> RESERVED | <data> = | { <l>left|<r>right } }"];
+p0x5040000002d0[label = "{ <ptr> 0x5040000002d0 | <type> NAME | <data> name_len = 3 | { <l>left|<r>right } }"];
+p0x504000000350[label = "{ <ptr> 0x504000000350 | <type> NUMBER | <data> 15 | { <l>left|<r>right } }"];
 
-p0x504000000110:<l> -> p0x504000000010
-p0x504000000010:<l> -> p0x504000000090
-p0x504000000090:<l> -> p0x504000000050
-p0x504000000090:<r> -> p0x5040000000d0
+p0x504000000110:<l> -> p0x504000000050
+p0x504000000050:<l> -> p0x504000000010
+p0x504000000050:<r> -> p0x504000000090
+p0x504000000090:<l> -> p0x5040000000d0
+p0x504000000110:<r> -> p0x504000000250
+p0x504000000250:<l> -> p0x504000000150
+p0x504000000150:<l> -> p0x5040000001d0
+p0x5040000001d0:<l> -> p0x504000000190
+p0x5040000001d0:<r> -> p0x504000000210
+p0x504000000250:<r> -> p0x504000000390
+p0x504000000390:<l> -> p0x504000000290
+p0x504000000290:<l> -> p0x504000000310
+p0x504000000310:<l> -> p0x5040000002d0
+p0x504000000310:<r> -> p0x504000000350
 }

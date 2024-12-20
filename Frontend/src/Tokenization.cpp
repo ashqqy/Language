@@ -62,11 +62,25 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
             buf_shift += name_len;
         }
 
+        // считываем двухбайтовые символы
+        else if (buf[buf_shift] == '|' || buf[buf_shift] == '&' || buf[buf_shift] == '=' ||
+                 buf[buf_shift] == '!' || buf[buf_shift] == '<' || buf[buf_shift] == '>')
+        {
+            tree_data_t token_data = {};
+            // если нашлось такое зарезервированное имя
+            if (FindReservedDataByName (buf + buf_shift, 2, &token_data) == 0)
+            {
+                TOKEN_INIT_ (token_data);
+                buf_shift += 1;
+            }
+        }
+
         // считываем однобайтовые символы
         else if (buf[buf_shift] == '(' || buf[buf_shift] == ')' || buf[buf_shift] == ';' ||
                  buf[buf_shift] == '{' || buf[buf_shift] == '}' || buf[buf_shift] == '+' || 
                  buf[buf_shift] == '-' || buf[buf_shift] == '/' || buf[buf_shift] == '*' || 
-                 buf[buf_shift] == '^' || buf[buf_shift] == '=')
+                 buf[buf_shift] == '^' || buf[buf_shift] == '=' || buf[buf_shift] == '!' || 
+                 buf[buf_shift] == '<' || buf[buf_shift] == '>')
         {
             tree_data_t token_data = {};
             FindReservedDataByName (buf + buf_shift, 1, &token_data);

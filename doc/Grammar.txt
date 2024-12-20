@@ -1,13 +1,31 @@
-<Program> ::= <VariableInit> <Program> | <VariableInit>
+<Program> ::= <Statement> <Program> | <Statement>
 
-<VariableInit> ::= <Type> <Assignment> | <Assignment>
-<Assignment> ::= <Name> "=" <Number> ";"
+<Statement> ::= <if> | <Variable_Init>
 
+//-----------------------------------------------------------------
+
+<If> ::= "if" "(" <Bool> ")" "{" <Statement> "}" ["else" "{" <Statement> "}"]
+
+//-----------------------------------------------------------------
+
+<Bool> ::= <Bool_1> <compare_operator> <Bool_1>
+<Bool_1> ::= <Number> | <Variable> 
+<compare_operator> ::= "==" | "!=" | "<" | ">" | "<=" | ">="
+
+//-----------------------------------------------------------------
+
+<Variable_Init> ::= <Type> <Assignment> | <Assignment>
 <Type> ::= "int" | "double"
+<Assignment> ::= <Variable> "=" <Number> ";"
+<Variable> ::= <Name>
+
+//-----------------------------------------------------------------
 
 <Name> ::= {<Letter>}
 
 <Number> ::= ["-"] {<Digit>} ["." {Digit}]
+
+//-----------------------------------------------------------------
 
 <Digit> ::= 
 "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"
@@ -18,4 +36,6 @@
 "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | 
 "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
 
-<Symbol> ::= "_" | "(" | ")"
+<Symbol> ::= "(" | ")" | ";" | "=" | "-" | "."
+
+//-----------------------------------------------------------------
