@@ -232,3 +232,44 @@ void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
     }
 }
 
+//------------------------------------------------------
+
+int var_counter = 0;
+
+void TreeOutput (FILE* output_file, tree_node_t* node)
+{
+    CustomAssert (output_file != NULL);
+    CustomAssert (node        != NULL);
+
+    fprintf (output_file, "( ");
+    fprintf (output_file, "%d ", node->data.type);
+    if (node->data.type == RESERVED)
+        fprintf (output_file, "%d ", node->data.content.reserved);
+    if (node->data.type == NAME)
+    {
+        fprintf (output_file, "%d ", var_counter);
+        var_counter += 1;
+    }
+    if (node->data.type == NUMBER)
+        fprintf (output_file, "%g ", node->data.content.number);
+
+    if (node->left != NULL)
+        TreeOutput (output_file, node->left);
+    else
+        fprintf (output_file, "_ ");
+
+    if (node->right != NULL)
+        TreeOutput (output_file, node->right);
+    else
+        fprintf (output_file, "_ ");
+
+    fprintf (output_file, ") ");
+}
+
+void TreeInput (FILE* input_file, tree_node_t* node)
+{
+    CustomAssert (input_file != NULL);
+    CustomAssert (node       != NULL);
+
+
+}

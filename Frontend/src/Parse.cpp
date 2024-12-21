@@ -1,5 +1,5 @@
 #include "Tokenization.h"
-#include "Parce.h"
+#include "Parse.h"
 #include "Tree.h"
 #include "CustomAssert.h"
 
@@ -373,8 +373,6 @@ tree_node_t* GetBracket (tree_node_t** token_array, size_t* const shift)
     if ((TKN_DATA_ (type) == RESERVED) && 
        (TKN_DATA_ (content.reserved) == LBRACK))
     {
-        free (token_array[*shift]); token_array[*shift] = NULL;
-
         *shift += 1;
         tree_node_t* node = GetPlus (token_array, shift);
         if ((TKN_DATA_ (type) != RESERVED) || 

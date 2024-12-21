@@ -4,7 +4,8 @@
 enum common_errors
 {
     OPENING_FILE_ERROR = 1,
-    READING_FILE_ERROR = 2
+    READING_FILE_ERROR = 2,
+    TOKENIZATION_ERROR = 3
 };
 
 enum tree_data_type_t
@@ -77,36 +78,36 @@ struct reserved_names_t
 
 const reserved_names_t reserved_names[] = 
 {
-    {.name = "(",  .data = {.type = RESERVED, .content = {.reserved = LBRACK}}},
-    {.name = ")",  .data = {.type = RESERVED, .content = {.reserved = RBRACK}}},
-    {.name = "{",  .data = {.type = RESERVED, .content = {.reserved = LCURBR}}},
-    {.name = "}",  .data = {.type = RESERVED, .content = {.reserved = RCURBR}}},
-    {.name = ";",  .data = {.type = RESERVED, .content = {.reserved = SEMI}}},
+    {.name = "(",       .data = {.type = RESERVED, .content = {.reserved = LBRACK}}},
+    {.name = ")",       .data = {.type = RESERVED, .content = {.reserved = RBRACK}}},
+    {.name = "{",       .data = {.type = RESERVED, .content = {.reserved = LCURBR}}},
+    {.name = "}",       .data = {.type = RESERVED, .content = {.reserved = RCURBR}}},
+    {.name = ";",       .data = {.type = RESERVED, .content = {.reserved = SEMI}}},
 
-    {.name = "=",  .data = {.type = RESERVED, .content = {.reserved = ASG}}},
+    {.name = "=",       .data = {.type = RESERVED, .content = {.reserved = ASG}}},
 
-    {.name = "+",  .data = {.type = RESERVED, .content = {.reserved = ADD}}},
-    {.name = "-",  .data = {.type = RESERVED, .content = {.reserved = SUB}}},
-    {.name = "*",  .data = {.type = RESERVED, .content = {.reserved = MUL}}},
-    {.name = "/",  .data = {.type = RESERVED, .content = {.reserved = DIV}}},
-    {.name = "^",  .data = {.type = RESERVED, .content = {.reserved = DEG}}},
+    {.name = "+",       .data = {.type = RESERVED, .content = {.reserved = ADD}}},
+    {.name = "-",       .data = {.type = RESERVED, .content = {.reserved = SUB}}},
+    {.name = "*",       .data = {.type = RESERVED, .content = {.reserved = MUL}}},
+    {.name = "/",       .data = {.type = RESERVED, .content = {.reserved = DIV}}},
+    {.name = "^",       .data = {.type = RESERVED, .content = {.reserved = DEG}}},
 
-    {.name = "<",  .data = {.type = RESERVED, .content = {.reserved = LT}}},
-    {.name = ">",  .data = {.type = RESERVED, .content = {.reserved = GT}}},
-    {.name = "==",  .data = {.type = RESERVED, .content = {.reserved = EQ}}},
-    {.name = "!=",  .data = {.type = RESERVED, .content = {.reserved = NEQ}}},
-    {.name = "<=",  .data = {.type = RESERVED, .content = {.reserved = LTE}}},
-    {.name = ">=",  .data = {.type = RESERVED, .content = {.reserved = GTE}}},
+    {.name = "<",       .data = {.type = RESERVED, .content = {.reserved = LT}}},
+    {.name = ">",       .data = {.type = RESERVED, .content = {.reserved = GT}}},
+    {.name = "==",      .data = {.type = RESERVED, .content = {.reserved = EQ}}},
+    {.name = "!=",      .data = {.type = RESERVED, .content = {.reserved = NEQ}}},
+    {.name = "<=",      .data = {.type = RESERVED, .content = {.reserved = LTE}}},
+    {.name = ">=",      .data = {.type = RESERVED, .content = {.reserved = GTE}}},
 
-    {.name = "||",  .data = {.type = RESERVED, .content = {.reserved = OR}}},
-    {.name = "&&",  .data = {.type = RESERVED, .content = {.reserved = AND}}},
-    {.name = "!",  .data = {.type = RESERVED, .content = {.reserved = NOT}}},
+    {.name = "||",      .data = {.type = RESERVED, .content = {.reserved = OR}}},
+    {.name = "&&",      .data = {.type = RESERVED, .content = {.reserved = AND}}},
+    {.name = "!",       .data = {.type = RESERVED, .content = {.reserved = NOT}}},
 
-    {.name = "int",  .data = {.type = RESERVED, .content = {.reserved = INT}}},
+    {.name = "int",     .data = {.type = RESERVED, .content = {.reserved = INT}}},
     {.name = "double",  .data = {.type = RESERVED, .content = {.reserved = DBL}}},
-    {.name = "if",  .data = {.type = RESERVED, .content = {.reserved = IF}}},
-    {.name = "else",  .data = {.type = RESERVED, .content = {.reserved = ELSE}}},
-    {.name = "while",  .data = {.type = RESERVED, .content = {.reserved = WHILE}}}
+    {.name = "if",      .data = {.type = RESERVED, .content = {.reserved = IF}}},
+    {.name = "else",    .data = {.type = RESERVED, .content = {.reserved = ELSE}}},
+    {.name = "while",   .data = {.type = RESERVED, .content = {.reserved = WHILE}}}
 };
 
 int FindReservedDataByName (const char* name_begin, size_t name_len, tree_data_t* data);

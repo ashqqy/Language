@@ -28,6 +28,9 @@ void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node);
 void TreeArrayDump (tree_node_t** array);
 void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node);
 
+void TreeOutput (FILE* output_file, tree_node_t* node);
+void TreeInput (FILE* input_file, tree_node_t* node);
+
 //--------------------------------------------------------------------------
 
 #endif //TREE_H

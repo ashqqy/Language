@@ -1,5 +1,5 @@
-#ifndef PARCE_H
-#define PARCE_H
+#ifndef PARSE_H
+#define PARSE_H
 
 tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift);
@@ -21,4 +21,4 @@ tree_node_t* GetMult (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetDeg (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetBracket (tree_node_t** token_array, size_t* const shift);
 
-#endif // PARCE_H
+#endif // PARSE_H

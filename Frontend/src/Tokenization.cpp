@@ -6,24 +6,44 @@
 #include "Tree.h"
 #include "Tokenization.h"
 #include "CustomAssert.h"
+#include "MyAllocation.h"
 
 //--------------------------------------------------------------------------
 
-#define TOKEN_INIT_(token_data)                                                   \
-    token_array[tkn_arr_shift] = (tree_node_t*) calloc (1, sizeof (tree_node_t)); \
-    token_array[tkn_arr_shift]->data = token_data;                                \
-    tkn_arr_shift += 1
+#define TOKEN_INIT_(token_data)                                                     \
+    token_array[tkn_arr_shift] = (tree_node_t*) calloc (1, sizeof (tree_node_t));   \
+    token_array[tkn_arr_shift]->data = token_data;                                  \
+    tkn_arr_shift += 1;                                                             \
+    if (tkn_arr_shift >= tkn_arr_size)                                              \
+    {                                                                               \
+        token_array = TokenArrayResize (token_array, &tkn_arr_size);                \
+        CustomWarning (token_array != NULL, NULL);                                  \
+    }
 
 //--------------------------------------------------------------------------
 
-tree_node_t** Tokenization (char* buf, size_t buf_size)
+tree_node_t** TokenArrayResize (tree_node_t** token_array, size_t* tkn_arr_size)
+{
+    CustomAssert (token_array  != NULL);
+    CustomAssert (tkn_arr_size != NULL);
+
+    const tree_node_t* POISON = NULL;
+    token_array = (tree_node_t**) MyRecalloc (token_array, *tkn_arr_size * 2, sizeof (tree_node_t*), *tkn_arr_size, &POISON);
+    CustomWarning (token_array != NULL, NULL);
+    *tkn_arr_size *= 2;
+
+    return token_array;
+}
+
+tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
 {
     CustomAssert (buf != NULL);
 
     size_t buf_shift = 0;
 
     tree_node_t** token_array = (tree_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (tree_node_t*));
-    // TODO size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
+    CustomWarning (token_array != NULL, NULL);
+    size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
     size_t tkn_arr_shift = 0;
 
     while (buf_shift < buf_size)
@@ -62,29 +82,6 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
             buf_shift += name_len;
         }
 
-        else if (buf[buf_shift] == '(' || buf[buf_shift] == ')' || buf[buf_shift] == ';' ||
-                 buf[buf_shift] == '{' || buf[buf_shift] == '}' || buf[buf_shift] == '+' || 
-                 buf[buf_shift] == '-' || buf[buf_shift] == '/' || buf[buf_shift] == '*' || 
-                 buf[buf_shift] == '^' || buf[buf_shift] == '=' || buf[buf_shift] == '!' || 
-                 buf[buf_shift] == '<' || buf[buf_shift] == '>' || buf[buf_shift] == '|' || 
-                 buf[buf_shift] == '&')
-        {
-            tree_data_t token_data = {};
-            // если нашлась комбинация из 2 байт
-            if (FindReservedDataByName (buf + buf_shift, 2, &token_data) == 0)
-            {
-                TOKEN_INIT_ (token_data);
-                buf_shift += 2;
-            }
-            // иначе считываем как 1 байт
-            else
-            {
-                FindReservedDataByName (buf + buf_shift, 1, &token_data);
-                TOKEN_INIT_ (token_data);
-                buf_shift += 1;
-            }
-        }
-
         // пропускаем все после # (комментарий)
         else if (buf[buf_shift] == '#')
         {
@@ -96,16 +93,38 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
         }
 
         // игнорируем мусорные символы
-        else if (buf[buf_shift] == ' ' || buf[buf_shift] == '\r' || buf[buf_shift] == '\n')
+        else if (isspace(buf[buf_shift]))
+        {
             buf_shift += 1;
+        }
 
-        else 
-            SyntaxError ("Unexpected character");
+        else
+        {
+            tree_data_t token_data = {};
+            // если нашлась комбинация из 2 байт
+            if (FindReservedDataByName (buf + buf_shift, 2, &token_data) == 0)
+            {
+                TOKEN_INIT_ (token_data);
+                buf_shift += 2;
+            }
+            // иначе считываем как 1 байт
+            else if (FindReservedDataByName (buf + buf_shift, 1, &token_data) == 0)
+            {
+                TOKEN_INIT_ (token_data);
+                buf_shift += 1;
+            }
 
+            else 
+            {
+                SyntaxError ("Unexpected character");
+            }
+        }
     }
 
     tree_data_t token_data = {.type = RESERVED, .content = {.reserved = END}};
     TOKEN_INIT_ (token_data);
+
+    *frontend = {.token_array = token_array};
 
     return token_array;
 }
@@ -113,7 +132,7 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
 //--------------------------------------------------------------------------
 
 void TokenArrayDestroy (tree_node_t** token_array)
-{
+{   
     int i = 0;
     while ((token_array[i]->data.type != RESERVED) || (token_array[i]->data.content.reserved != END))
     {
