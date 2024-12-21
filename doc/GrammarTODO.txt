@@ -1,3 +1,5 @@
+// TODO bool
+
 <Boolean_expression> ::= <Bool_3> | <Bool_3> <or_operator> <Boolean_expression>
 <Bool_3> ::= <Bool_2> | <Bool_2> <and_operator> <Bool_3>
 <Bool_2> ::= <Bool_1> | <not_operator> <Bool_2>
@@ -6,3 +8,5 @@
 <and_operator> ::= "&&"
 <not_operator> ::= "!"
 <compare_operator> ::= "==" | "!=" | "<" | ">" | "<=" | ">="
+
+// TODO else

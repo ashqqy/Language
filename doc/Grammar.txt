@@ -1,25 +1,31 @@
 <Program> ::= <Statement> <Program> | <Statement>
 
-<Statement> ::= <if> | <Variable_Init>
+<Statement> ::= <If> | <While> | <Variable_init>
 
 //-----------------------------------------------------------------
 
 <If> ::= "if" "(" <Bool> ")" "{" <Statement> "}" ["else" "{" <Statement> "}"]
+<While> ::= "while" "(" <Bool> ")" "{" <Statement> "}"
 
 //-----------------------------------------------------------------
 
-<Bool> ::= <Bool_1> <compare_operator> <Bool_1>
-<Bool_1> ::= <Number> | <Variable> 
-<compare_operator> ::= "==" | "!=" | "<" | ">" | "<=" | ">="
+<Bool> ::= <Bool_1> <Compare_operator> <Bool_1>
+<Bool_1> ::= <Math_expression> | <Variable> 
+<Compare_operator> ::= "==" | "!=" | "<" | ">" | "<=" | ">="
 
 //-----------------------------------------------------------------
 
-<Variable_Init> ::= <Type> <Assignment> | <Assignment>
+<Variable_init> ::= <Type> <Assignment> | <Assignment>
 <Type> ::= "int" | "double"
-<Assignment> ::= <Variable> "=" <Number> ";"
+<Assignment> ::= <Variable> "=" <Math_expression> ";"
 <Variable> ::= <Name>
 
 //-----------------------------------------------------------------
+
+<Math_expression> ::=  <Math_op3> [("+" | "-") <Math_expression>] | <Math_op3>
+<Math_op3> ::=  <Math_op2> [("*" | "/") <Math_op3>] | <Math_op2>
+<Math_op2> ::=  <Math_op1> ["^" <Math_op2>] | <Math_op1>
+<Math_op1> ::= "(" <Math_expression> ")" | <Number> | <Variable>
 
 <Name> ::= {<Letter>}
 

@@ -26,15 +26,7 @@ tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
 
-    tree_node_t* root_node = GetStatement (token_array, shift);
-    tree_node_t* join_node = root_node;
-
-    while (TKN_DATA_ (type) != RESERVED || TKN_DATA_ (content.reserved) != END)
-    {
-        tree_node_t* next_node = GetStatement (token_array, shift);
-        NodeLink (next_node, &join_node->right);
-        join_node = next_node;
-    }
+    tree_node_t* root_node = GetStatements (token_array, shift, END);
 
     return root_node;
 }
@@ -45,13 +37,32 @@ tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift)
     CustomAssert (shift       != NULL);
 
     tree_node_t* if_node = GetIf (token_array, shift);
-    if (if_node == NULL)
-    {
-        tree_node_t* var_node = GetVarInit (token_array, shift);
-        return var_node;
-    }
-    else
+    if (if_node != NULL)
         return if_node;
+
+    tree_node_t* while_node = GetWhile (token_array, shift);
+    if (while_node != NULL)
+        return while_node;
+
+    tree_node_t* var_node = GetVarInit (token_array, shift);
+    return var_node;
+}
+
+tree_node_t* GetStatements (tree_node_t** token_array, size_t* shift, reserved_t end_token)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* root_node = GetStatement (token_array, shift);
+    tree_node_t* join_node = root_node;
+    while (TKN_DATA_ (type) != RESERVED || TKN_DATA_ (content.reserved) != end_token)
+    {
+        tree_node_t* next_node = GetStatement (token_array, shift);
+        NodeLink (next_node, &join_node->right);
+        join_node = next_node;    
+    }
+
+    return root_node;
 }
 
 tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
@@ -65,25 +76,59 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
     GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
     GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
 
-    tree_node_t* statement_node = GetStatement (token_array, shift);
-    tree_node_t* join_node = statement_node;
+    tree_node_t* if_statement_node = GetStatements (token_array, shift, RCURBR);
 
-    while (TKN_DATA_ (type) != RESERVED || TKN_DATA_ (content.reserved) != RCURBR)
+    GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
+
+    if (TKN_DATA_ (type) == RESERVED && TKN_DATA_ (content.reserved) == ELSE)
     {
-        tree_node_t* next_node = GetStatement (token_array, shift);
-        NodeLink (next_node, &join_node->right);
-        join_node = next_node;
+        GET_RESERVED_ (ELSE, else_node, 1, 'else');
+        GET_RESERVED_ (LCURBR, else_lcurbr_node, 0, '{');
+        tree_node_t* else_statement_node = GetStatements (token_array, shift, RCURBR);
+        GET_RESERVED_ (RCURBR, else_rcurbr_node, 0, '}');
+
+        NodeLink (bool_node, &if_node->left);
+        NodeLink (else_node, &if_node->right);
+        NodeLink (if_statement_node, &else_node->left);        
+        NodeLink (else_statement_node, &else_node->right);        
+        
+        // не используются
+        else_lcurbr_node = NULL; else_rcurbr_node = NULL;
     }
+    else 
+    {
+        NodeLink (bool_node, &if_node->left);
+        NodeLink (if_statement_node, &if_node->right);
+    }
+
+    // не используются
+    lbrack_node = NULL; rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
+
+    return if_node;
+}
+
+tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    GET_RESERVED_ (WHILE, while_node, 1, 'while');
+    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
+    tree_node_t* bool_node = GetBool (token_array, shift);
+    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
+    GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
+
+    tree_node_t* statement_node = GetStatements (token_array, shift, RCURBR);
 
     GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
 
     // не используются
     lbrack_node = NULL; rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
 
-    NodeLink (bool_node, &if_node->left);
-    NodeLink (statement_node, &if_node->right);
+    NodeLink (bool_node, &while_node->left);
+    NodeLink (statement_node, &while_node->right);
 
-    return if_node;
+    return while_node;
 }
 
 tree_node_t* GetBool (tree_node_t** token_array, size_t* shift)
@@ -106,7 +151,7 @@ tree_node_t* GetBoolP1 (tree_node_t** token_array, size_t* shift)
     CustomAssert (token_array != NULL);
     CustomAssert (shift       != NULL);
 
-    tree_node_t* num_node = GetNum (token_array, shift);
+    tree_node_t* num_node = GetMath (token_array, shift);
     if (num_node != NULL)
         return num_node;     
 
@@ -180,16 +225,16 @@ tree_node_t* GetAsg (tree_node_t** token_array, size_t* shift)
 
     GET_RESERVED_ (ASG, asg_node, 0, '=');
 
-    tree_node_t* num_node  = GetNum (token_array, shift);
+    tree_node_t* math_node  = GetMath (token_array, shift);
 
-    if (num_node == NULL)
-        SyntaxError ("Number asg error");
+    if (math_node == NULL)
+        SyntaxError ("Math assignment error");
     GET_RESERVED_ (SEMI, semi_node, 0, ';');
 
 
     NodeLink (asg_node, &semi_node->left);
     NodeLink (name_node, &asg_node->left);
-    NodeLink (num_node, &asg_node->right);
+    NodeLink (math_node, &asg_node->right);
 
     return semi_node;
 }
@@ -241,5 +286,114 @@ tree_node_t* GetNum (tree_node_t** token_array, size_t* shift)
         return NULL;
 }
 
+//--------------------------------------------------------------------------
+
+tree_node_t* GetMath (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* math_node = GetPlus (token_array, shift);
+
+    return math_node;
+}
+
+tree_node_t* GetPlus (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetMult (token_array, shift);
+    if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == ADD || TKN_DATA_ (content.reserved) == SUB))
+    {   
+        tree_node_t* parent_node = token_array[*shift];
+
+        *shift += 1;
+        tree_node_t* second_node = GetPlus (token_array, shift);
+        
+        NodeLink (first_node, &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+
+        first_node = parent_node;
+    }
+    return first_node;
+}
+
+tree_node_t* GetMult (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetDeg (token_array, shift);
+
+    if ((TKN_DATA_ (type) == RESERVED) && 
+        (TKN_DATA_ (content.reserved) == MUL || TKN_DATA_ (content.reserved) == DIV))
+    {
+        tree_node_t* parent_node = token_array[*shift];
+
+        *shift += 1;
+        tree_node_t* second_node = GetMult (token_array, shift);
+
+        NodeLink (first_node,  &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+        
+        first_node = parent_node;
+    }
+    return first_node;
+}
+
+tree_node_t* GetDeg (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    tree_node_t* first_node = GetBracket (token_array, shift);
+
+    if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == DEG))
+    {
+        tree_node_t* parent_node = token_array[*shift];
+
+        *shift += 1;
+        tree_node_t* second_node = GetDeg (token_array, shift);
+
+        NodeLink (first_node,  &parent_node->left);
+        NodeLink (second_node, &parent_node->right);
+
+        first_node = parent_node;
+    }
+
+    return first_node;
+}
+
+tree_node_t* GetBracket (tree_node_t** token_array, size_t* const shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    if ((TKN_DATA_ (type) == RESERVED) && 
+       (TKN_DATA_ (content.reserved) == LBRACK))
+    {
+        free (token_array[*shift]); token_array[*shift] = NULL;
+
+        *shift += 1;
+        tree_node_t* node = GetPlus (token_array, shift);
+        if ((TKN_DATA_ (type) != RESERVED) || 
+            (TKN_DATA_ (content.reserved) != RBRACK))
+            SyntaxError ("Expected close bracket");
+
+        *shift += 1;
+        return node;
+    }
+
+    else if (TKN_DATA_ (type) == NUMBER)
+        return GetNum (token_array, shift);
+    else
+        return GetName (token_array, shift);
+}
+
+//--------------------------------------------------------------------------
+
 #undef TKN_DATA_
 #undef GET_RESERVED_
+
+//--------------------------------------------------------------------------

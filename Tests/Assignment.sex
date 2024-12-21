@@ -1,8 +1,11 @@
-if (x < 5)
+if (x < 5 + 1)
 {
-    if (y >= 7)
+    while (y == 6)
     {
-        bebra = 1;
-        chinazes = 2;
+        bebra = 8 + 7;
     }
+}
+else
+{
+    bobik = 1;
 }

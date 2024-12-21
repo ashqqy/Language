@@ -23,7 +23,7 @@ tree_node_t** Tokenization (char* buf, size_t buf_size)
     size_t buf_shift = 0;
 
     tree_node_t** token_array = (tree_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (tree_node_t*));
-    size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
+    // TODO size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
     size_t tkn_arr_shift = 0;
 
     while (buf_shift < buf_size)
