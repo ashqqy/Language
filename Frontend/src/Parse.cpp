@@ -90,7 +90,9 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
         NodeLink (bool_node, &if_node->left);
         NodeLink (else_node, &if_node->right);
         NodeLink (if_statement_node, &else_node->left);        
-        NodeLink (else_statement_node, &else_node->right);        
+        NodeLink (else_statement_node, &else_node->right);
+        NodeLink (if_node, &lbrack_node->left);
+        lbrack_node->data.content.reserved = SEMI;        
         
         // не используются
         else_lcurbr_node = NULL; else_rcurbr_node = NULL;
@@ -99,12 +101,14 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
     {
         NodeLink (bool_node, &if_node->left);
         NodeLink (if_statement_node, &if_node->right);
+        NodeLink (if_node, &lbrack_node->left);
+        lbrack_node->data.content.reserved = SEMI;
     }
 
     // не используются
-    lbrack_node = NULL; rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
+    rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
 
-    return if_node;
+    return lbrack_node;
 }
 
 tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift)
@@ -123,12 +127,14 @@ tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift)
     GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
 
     // не используются
-    lbrack_node = NULL; rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
+    rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
 
     NodeLink (bool_node, &while_node->left);
     NodeLink (statement_node, &while_node->right);
+    NodeLink (while_node, &lbrack_node->left);
+    lbrack_node->data.content.reserved = SEMI;
 
-    return while_node;
+    return lbrack_node;
 }
 
 tree_node_t* GetBool (tree_node_t** token_array, size_t* shift)

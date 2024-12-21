@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "FilesReading.h"
 #include "Common.h"
 #include "CustomAssert.h"
 #include "Tree.h"
@@ -130,8 +131,8 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
 
         case NAME:
         {
-            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> name_len = %lu | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NAME", node->data.content.name.len);
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
+                    node, node, "NAME", node->data.content.name.index);
             break;
         }
 
@@ -215,8 +216,8 @@ void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
 
         case NAME:
         {
-            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> name_len = %lu | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NAME", node->data.content.name.len);
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
+                    node, node, "NAME", node->data.content.name.index);
             break;
         }
 
@@ -234,8 +235,6 @@ void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
 
 //------------------------------------------------------
 
-int var_counter = 0;
-
 void TreeOutput (FILE* output_file, tree_node_t* node)
 {
     CustomAssert (output_file != NULL);
@@ -246,10 +245,8 @@ void TreeOutput (FILE* output_file, tree_node_t* node)
     if (node->data.type == RESERVED)
         fprintf (output_file, "%d ", node->data.content.reserved);
     if (node->data.type == NAME)
-    {
-        fprintf (output_file, "%d ", var_counter);
-        var_counter += 1;
-    }
+        fprintf (output_file, "%d ", node->data.content.name.index);
+
     if (node->data.type == NUMBER)
         fprintf (output_file, "%g ", node->data.content.number);
 
@@ -266,10 +263,24 @@ void TreeOutput (FILE* output_file, tree_node_t* node)
     fprintf (output_file, ") ");
 }
 
-void TreeInput (FILE* input_file, tree_node_t* node)
-{
-    CustomAssert (input_file != NULL);
-    CustomAssert (node       != NULL);
+// tree_node_t* TreeInput (FILE* database)
+// {
+//     CustomAssert (database != NULL);
 
+//     size_t buf_size = 0;
+//     char* buf = ReadFile (database, &buf_size);
+//     CustomWarning (buf != NULL, NULL);
+//     fclose (database);
 
-}
+//     size_t shift = 0;
+    
+//     while (shift < buf_size)
+//         ReadNode (buf, &shift);
+
+//     // return root_node;
+// }
+
+// tree_node_t* ReadNode (char* buf, size_t* shift)
+// {
+
+// }

@@ -3,9 +3,11 @@
 
 enum common_errors
 {
-    OPENING_FILE_ERROR = 1,
-    READING_FILE_ERROR = 2,
-    TOKENIZATION_ERROR = 3
+    NO_ERRORS          = 1,
+    OPENING_FILE_ERROR = 2,
+    READING_FILE_ERROR = 3,
+    TOKENIZATION_ERROR = 4,
+    ALLOCATION_ERROR   = 5
 };
 
 enum tree_data_type_t
@@ -19,6 +21,7 @@ struct name_t
 {
     char* begin;
     size_t len;
+    int index;
 };
 
 enum reserved_t

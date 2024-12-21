@@ -2,9 +2,10 @@ digraph G
 {
 node[shape="record", style="rounded, filled"];
 
+p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x504000000010[label = "{ <ptr> 0x504000000010 | <type> RESERVED | <data> \if | { <l>left|<r>right } }"];
 p0x5040000000d0[label = "{ <ptr> 0x5040000000d0 | <type> RESERVED | <data> \< | { <l>left|<r>right } }"];
-p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> NAME | <data> name_len = 1 | { <l>left|<r>right } }"];
+p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
 p0x5040000002d0[label = "{ <ptr> 0x5040000002d0 | <type> RESERVED | <data> \* | { <l>left|<r>right } }"];
 p0x504000000190[label = "{ <ptr> 0x504000000190 | <type> RESERVED | <data> \+ | { <l>left|<r>right } }"];
 p0x504000000150[label = "{ <ptr> 0x504000000150 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
@@ -13,21 +14,23 @@ p0x5040000001d0[label = "{ <ptr> 0x5040000001d0 | <type> NUMBER | <data> 1 | { <
 p0x504000000250[label = "{ <ptr> 0x504000000250 | <type> NUMBER | <data> 3 | { <l>left|<r>right } }"];
 p0x504000000310[label = "{ <ptr> 0x504000000310 | <type> NUMBER | <data> 8 | { <l>left|<r>right } }"];
 p0x504000000790[label = "{ <ptr> 0x504000000790 | <type> RESERVED | <data> \else | { <l>left|<r>right } }"];
+p0x504000000410[label = "{ <ptr> 0x504000000410 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x5040000003d0[label = "{ <ptr> 0x5040000003d0 | <type> RESERVED | <data> \while | { <l>left|<r>right } }"];
 p0x504000000490[label = "{ <ptr> 0x504000000490 | <type> RESERVED | <data> \== | { <l>left|<r>right } }"];
-p0x504000000450[label = "{ <ptr> 0x504000000450 | <type> NAME | <data> name_len = 1 | { <l>left|<r>right } }"];
+p0x504000000450[label = "{ <ptr> 0x504000000450 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
 p0x5040000004d0[label = "{ <ptr> 0x5040000004d0 | <type> NUMBER | <data> 6 | { <l>left|<r>right } }"];
 p0x5040000006d0[label = "{ <ptr> 0x5040000006d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x5040000005d0[label = "{ <ptr> 0x5040000005d0 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
-p0x504000000590[label = "{ <ptr> 0x504000000590 | <type> NAME | <data> name_len = 5 | { <l>left|<r>right } }"];
+p0x504000000590[label = "{ <ptr> 0x504000000590 | <type> NAME | <data> 2 | { <l>left|<r>right } }"];
 p0x504000000650[label = "{ <ptr> 0x504000000650 | <type> RESERVED | <data> \+ | { <l>left|<r>right } }"];
 p0x504000000610[label = "{ <ptr> 0x504000000610 | <type> NUMBER | <data> 8 | { <l>left|<r>right } }"];
 p0x504000000690[label = "{ <ptr> 0x504000000690 | <type> NUMBER | <data> 7 | { <l>left|<r>right } }"];
 p0x5040000008d0[label = "{ <ptr> 0x5040000008d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x504000000850[label = "{ <ptr> 0x504000000850 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
-p0x504000000810[label = "{ <ptr> 0x504000000810 | <type> NAME | <data> name_len = 5 | { <l>left|<r>right } }"];
+p0x504000000810[label = "{ <ptr> 0x504000000810 | <type> NAME | <data> 3 | { <l>left|<r>right } }"];
 p0x504000000890[label = "{ <ptr> 0x504000000890 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
 
+p0x504000000050:<l> -> p0x504000000010
 p0x504000000010:<l> -> p0x5040000000d0
 p0x5040000000d0:<l> -> p0x504000000090
 p0x5040000000d0:<r> -> p0x5040000002d0
@@ -38,7 +41,8 @@ p0x504000000210:<l> -> p0x5040000001d0
 p0x504000000210:<r> -> p0x504000000250
 p0x5040000002d0:<r> -> p0x504000000310
 p0x504000000010:<r> -> p0x504000000790
-p0x504000000790:<l> -> p0x5040000003d0
+p0x504000000790:<l> -> p0x504000000410
+p0x504000000410:<l> -> p0x5040000003d0
 p0x5040000003d0:<l> -> p0x504000000490
 p0x504000000490:<l> -> p0x504000000450
 p0x504000000490:<r> -> p0x5040000004d0

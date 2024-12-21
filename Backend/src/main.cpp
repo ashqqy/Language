@@ -20,26 +20,3 @@ int main ()
 }
 
 //----------------------------------------------------------------------------
-
-
-tree_node_t* ReadDataBase (FILE* database)
-{
-    CustomAssert (database != NULL);
-
-    size_t buf_size = 0;
-    char* buf = ReadFile (database, &buf_size);
-    CustomWarning (buf != NULL, NULL);
-    fclose (database);
-
-    size_t shift = 0;
-    
-    while (shift < buf_size)
-        ReadNode (buf, &shift);
-
-    // return root_node;
-}
-
-tree_node_t* ReadNode (char* buf, size_t* shift)
-{
-
-}

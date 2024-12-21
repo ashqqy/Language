@@ -22,18 +22,20 @@
 
 //--------------------------------------------------------------------------
 
-tree_node_t** TokenArrayResize (tree_node_t** token_array, size_t* tkn_arr_size)
+common_errors FrontendInit (frontend_t* frontend)
 {
-    CustomAssert (token_array  != NULL);
-    CustomAssert (tkn_arr_size != NULL);
+    CustomAssert (frontend != NULL);
 
-    const tree_node_t* POISON = NULL;
-    token_array = (tree_node_t**) MyRecalloc (token_array, *tkn_arr_size * 2, sizeof (tree_node_t*), *tkn_arr_size, &POISON);
-    CustomWarning (token_array != NULL, NULL);
-    *tkn_arr_size *= 2;
+    frontend->names_table = (name_t*) calloc (NAMES_TABLE_SIZE, sizeof (name_t));
+    CustomWarning (frontend->names_table != NULL, ALLOCATION_ERROR);
+    frontend->n_names = 0;
+    frontend->token_array = NULL;
+    frontend->names_table_size = NAMES_TABLE_SIZE;
 
-    return token_array;
+    return NO_ERRORS;
 }
+
+//--------------------------------------------------------------------------
 
 tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
 {
@@ -74,6 +76,8 @@ tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
             if (FindReservedDataByName (buf + buf_shift, name_len, &token_data) != 0)
             {
                 name_t name_struct = {.begin = buf + buf_shift, .len = name_len};
+                name_struct.index = FindNameIndex (frontend, &name_struct);
+                CustomWarning (name_struct.index != -1, NULL);
                 token_data.type = NAME;
                 token_data.content.name = name_struct;
             }
@@ -124,9 +128,67 @@ tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
     tree_data_t token_data = {.type = RESERVED, .content = {.reserved = END}};
     TOKEN_INIT_ (token_data);
 
-    *frontend = {.token_array = token_array};
+    frontend->token_array = token_array;
 
     return token_array;
+}
+
+//--------------------------------------------------------------------------
+
+int FindNameIndex (frontend_t* frontend, name_t* name)
+{
+    CustomAssert (name != NULL);
+
+    for (int i = 0; i < frontend->n_names; ++i)
+    {
+        if (strncmp (frontend->names_table[i].begin, name->begin, frontend->names_table[i].len) == 0)
+        {
+            name->index = i;
+            return i;
+        }
+    }
+
+    if ((size_t) frontend->n_names >= frontend->names_table_size)
+    {
+        frontend->names_table = NamesArrayResize (frontend, &frontend->names_table_size);
+        CustomWarning (frontend->names_table != NULL, -1);
+    }
+
+    name->index = frontend->n_names;
+    frontend->names_table[frontend->n_names] = *name;
+    frontend->n_names += 1;
+
+    return name->index;
+}
+
+//--------------------------------------------------------------------------
+
+tree_node_t** TokenArrayResize (tree_node_t** token_array, size_t* token_arr_size)
+{
+    CustomAssert (token_array  != NULL);
+    CustomAssert (token_arr_size != NULL);
+
+    const tree_node_t* POISON = NULL;
+    token_array = (tree_node_t**) MyRecalloc (token_array, *token_arr_size * 2, sizeof (tree_node_t*), *token_arr_size, &POISON);
+    CustomWarning (token_array != NULL, NULL);
+    *token_arr_size *= 2;
+
+    return token_array;
+}
+
+//--------------------------------------------------------------------------
+
+name_t* NamesArrayResize (frontend_t* frontend, size_t* arr_size)
+{
+    CustomAssert (frontend != NULL);
+    CustomAssert (arr_size    != NULL);
+
+    const name_t* POISON = NULL;
+    frontend->names_table = (name_t*) MyRecalloc (frontend->names_table, *arr_size * 2, sizeof (tree_node_t*), *arr_size, &POISON);
+    CustomWarning (frontend->names_table != NULL, NULL);
+    *arr_size *= 2;
+
+    return frontend->names_table;
 }
 
 //--------------------------------------------------------------------------

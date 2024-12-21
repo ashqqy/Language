@@ -21,6 +21,7 @@ int main ()
     fclose (file_with_code);
 
     frontend_t frontend = {};
+    CustomWarning (FrontendInit (&frontend) == NO_ERRORS, ALLOCATION_ERROR);
 
     tree_node_t** token_array = Tokenization (buf, buf_size, &frontend);
     CustomWarning (token_array != NULL, TOKENIZATION_ERROR);
@@ -34,7 +35,8 @@ int main ()
     TreeOutput (output_file, root_node);
     fclose (output_file);
 
-    TokenArrayDestroy (token_array);
+    free(frontend.names_table); frontend.names_table = NULL;
+    TokenArrayDestroy (frontend.token_array);
     free (buf); buf = NULL;
 }
 
