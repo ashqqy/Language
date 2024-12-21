@@ -58,7 +58,8 @@ enum reserved_t
 
     IF      = 24,
     ELSE    = 25,
-    WHILE   = 26
+    WHILE   = 26,
+    PRINT   = 27
 };
 
 struct tree_data_t
@@ -110,7 +111,8 @@ const reserved_names_t reserved_names[] =
     {.name = "double",  .data = {.type = RESERVED, .content = {.reserved = DBL}}},
     {.name = "if",      .data = {.type = RESERVED, .content = {.reserved = IF}}},
     {.name = "else",    .data = {.type = RESERVED, .content = {.reserved = ELSE}}},
-    {.name = "while",   .data = {.type = RESERVED, .content = {.reserved = WHILE}}}
+    {.name = "while",   .data = {.type = RESERVED, .content = {.reserved = WHILE}}},
+    {.name = "print",   .data = {.type = RESERVED, .content = {.reserved = PRINT}}}
 };
 
 int FindReservedDataByName (const char* name_begin, size_t name_len, tree_data_t* data);

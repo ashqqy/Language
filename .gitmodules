@@ -7,3 +7,9 @@
 [submodule "My-Allocation"]
 	path = My-Allocation
 	url = https://github.com/ashqqy/My-Allocation.git
+[submodule "Processor"]
+	path = Processor
+	url = https://github.com/ashqqy/Processor
+[submodule "Stack"]
+	path = Stack
+	url = https://github.com/ashqqy/Stack.git

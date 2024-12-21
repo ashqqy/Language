@@ -1,6 +1,6 @@
 <Program> ::= <Statement> <Program> | <Statement>
 
-<Statement> ::= <If> | <While> | <Variable_init>
+<Statement> ::= <If> | <While> | <Print> | <Variable_init>
 
 //-----------------------------------------------------------------
 

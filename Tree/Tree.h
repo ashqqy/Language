@@ -29,7 +29,8 @@ void TreeArrayDump (tree_node_t** array);
 void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node);
 
 void TreeOutput (FILE* output_file, tree_node_t* node);
-void TreeInput (FILE* input_file, tree_node_t* node);
+tree_node_t* TreeInput (FILE* database);
+tree_node_t* ReadNode (char* buf, size_t* shift);
 
 //--------------------------------------------------------------------------
 

@@ -12,7 +12,7 @@
 
 int main ()
 {
-    FILE* file_with_code = fopen ("./Tests/Assignment.bebra", "r");
+    FILE* file_with_code = fopen ("./Tests/Factorial.chinazes", "r");
     CustomWarning (file_with_code != NULL, OPENING_FILE_ERROR);
 
     size_t buf_size = 0;
@@ -29,7 +29,7 @@ int main ()
     size_t shift = 0;
     tree_node_t* root_node = GetProgram (token_array, &shift);
 
-    TreeDump (root_node);
+    // TreeDump (root_node);
 
     FILE* output_file = fopen ("./Dump/OutputFile.txt", "w");
     TreeOutput (output_file, root_node);

@@ -263,24 +263,81 @@ void TreeOutput (FILE* output_file, tree_node_t* node)
     fprintf (output_file, ") ");
 }
 
-// tree_node_t* TreeInput (FILE* database)
-// {
-//     CustomAssert (database != NULL);
+tree_node_t* TreeInput (FILE* database)
+{
+    CustomAssert (database != NULL);
 
-//     size_t buf_size = 0;
-//     char* buf = ReadFile (database, &buf_size);
-//     CustomWarning (buf != NULL, NULL);
-//     fclose (database);
+    size_t buf_size = 0;
+    char* buf = ReadFile (database, &buf_size);
+    CustomWarning (buf != NULL, NULL);
+    fclose (database);
 
-//     size_t shift = 0;
-    
-//     while (shift < buf_size)
-//         ReadNode (buf, &shift);
+    size_t shift = 0;
 
-//     // return root_node;
-// }
+    tree_node_t* root_node = ReadNode (buf, &shift);
 
-// tree_node_t* ReadNode (char* buf, size_t* shift)
-// {
+    free(buf); buf = NULL;
 
-// }
+    return root_node;
+}
+
+tree_node_t* ReadNode (char* buf, size_t* shift)
+{
+    CustomAssert (buf != NULL);
+    CustomAssert (shift != NULL);
+
+    tree_data_t node_data = {};
+
+    if (buf[*shift] == '(')
+    {
+        *shift += 2;
+        int type = 0;
+        int len_type = 0;
+        sscanf (buf + *shift, "%d%n", &type, &len_type);
+        node_data.type = (tree_data_type_t) type;
+        *shift += (size_t) len_type + 1;
+        if (node_data.type == RESERVED)
+        {
+            int reserved = 0;
+            int len_reserved = 0;
+            sscanf (buf + *shift, "%d%n", &reserved, &len_reserved);
+            node_data.content.reserved = (reserved_t) reserved;
+            *shift += (size_t) len_reserved + 1;
+        }
+        else if (node_data.type == NAME)
+        {
+            int index = -1;
+            int name_len = 0;
+            sscanf (buf + *shift, "%d%n", &index, &name_len);
+            node_data.content.name.index = index;
+            *shift += (size_t) name_len + 1;
+        }
+        else if (node_data.type == NUMBER)
+        {
+            double number = 0;
+            int num_len = 0;
+            sscanf (buf + *shift, "%lf%n", &number, &num_len);
+            node_data.content.number = number;
+            *shift += (size_t) num_len + 1;
+        }
+
+        tree_node_t* left_node  = ReadNode (buf, shift);
+        tree_node_t* right_node = ReadNode (buf, shift);
+
+        if (buf[*shift] == ')')
+        {
+            *shift += 2;
+            return NodeCreate (node_data, left_node, right_node);
+        }
+        else
+        {
+            CustomAssert ("expected close bracket" && 0);
+        }
+    }
+
+    else
+    {
+        *shift += 2;
+        return NULL;
+    }
+}

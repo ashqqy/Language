@@ -44,6 +44,10 @@ tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift)
     if (while_node != NULL)
         return while_node;
 
+    tree_node_t* print_node = GetPrint (token_array, shift);
+    if (print_node != NULL)
+        return print_node;
+
     tree_node_t* var_node = GetVarInit (token_array, shift);
     return var_node;
 }
@@ -63,6 +67,25 @@ tree_node_t* GetStatements (tree_node_t** token_array, size_t* shift, reserved_t
     }
 
     return root_node;
+}
+
+tree_node_t* GetPrint (tree_node_t** token_array, size_t* shift)
+{
+    CustomAssert (token_array != NULL);
+    CustomAssert (shift       != NULL);
+
+    GET_RESERVED_ (PRINT, print_node, 1, 'print');
+    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
+    tree_node_t* name_node = GetName (token_array, shift);
+    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
+    GET_RESERVED_ (SEMI, semi_node, 0, ';');
+
+    lbrack_node = NULL; rbrack_node = NULL;
+
+    NodeLink (name_node, &print_node->left);
+    NodeLink (print_node, &semi_node->left);
+
+    return semi_node;
 }
 
 tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)

@@ -4,6 +4,7 @@
 tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetStatements (tree_node_t** token_array, size_t* shift, reserved_t end_token);
+tree_node_t* GetPrint (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetIf (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift);
 tree_node_t* GetBool (tree_node_t** token_array, size_t* shift);
