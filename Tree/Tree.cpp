@@ -2,9 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "FilesReading.h"
 #include "Common.h"
-#include "CustomAssert.h"
 #include "Tree.h"
 
 //------------------------------------------------------
@@ -86,7 +84,7 @@ void TreeDump (tree_node_t* root_node)
 {
     CustomAssert (root_node != NULL);
 
-    FILE* dump_file = fopen ("./Dump/dump.dot", "w");
+    FILE* dump_file = fopen ("./dump/dump.dot", "w");
     CustomWarning (dump_file != NULL, ;);
 
     fprintf (dump_file, "digraph G\n");

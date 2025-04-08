@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "FilesReading.h"
 #include "Common.h"
-#include "CustomAssert.h"
 
 #include "Tokenization.h"
 #include "Parse.h"
@@ -31,7 +29,7 @@ int main ()
 
     // TreeDump (root_node);
 
-    FILE* output_file = fopen ("./Dump/OutputFile.txt", "w");
+    FILE* output_file = fopen ("./dump/OutputFile.txt", "w");
     TreeOutput (output_file, root_node);
     fclose (output_file);
 

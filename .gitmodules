@@ -1,15 +1,3 @@
-[submodule "Custom-Assert"]
-	path = Custom-Assert
-	url = https://github.com/ashqqy/Custom-Assert
-[submodule "Files-Reading"]
-	path = Files-Reading
-	url = https://github.com/ashqqy/Files-Reading
-[submodule "My-Allocation"]
-	path = My-Allocation
-	url = https://github.com/ashqqy/My-Allocation.git
 [submodule "Processor"]
 	path = Processor
-	url = https://github.com/ashqqy/Processor
-[submodule "Stack"]
-	path = Stack
-	url = https://github.com/ashqqy/Stack.git
+	url = git@github.com:ashqqy/Processor.git

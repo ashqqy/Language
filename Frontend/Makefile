@@ -15,7 +15,7 @@ FLAGS = -D _DEBUG -ggdb3 -std=c++17 -O0 -Wall -Wextra -Weffc++ -Waggressive-loop
 all: build run
 
 build: 
-	g++ -I./Tree -I./My-Allocation -I./Files-Reading -I./Common -I./Custom-Assert -I./Frontend/include ./Files-Reading/FilesReading.cpp ./Common/Common.cpp ./Frontend/src/*.cpp ./My-Allocation/MyAllocation.cpp ./Tree/Tree.cpp -o main $(FLAGS)
+	g++ -I./Tree -I./Common -I./Custom-Assert -I./Frontend/include ./Common/Common.cpp ./Frontend/src/*.cpp ./Tree/Tree.cpp -o main $(FLAGS)
 
 run: 
 	./main

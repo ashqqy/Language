@@ -1,6 +1,9 @@
 #ifndef COMMON_ERRORS_H
 #define COMMON_ERRORS_H
 
+#include <stdlib.h>
+#include <stdio.h>
+
 enum common_errors
 {
     NO_ERRORS          = 1,
@@ -117,5 +120,34 @@ const reserved_names_t reserved_names[] =
 
 int FindReservedDataByName (const char* name_begin, size_t name_len, tree_data_t* data);
 const char* FindReservedNameByData (tree_data_t data);
+
+char* ReadFile (FILE* file_input, size_t* n_readen);
+size_t FileSizeFinder (FILE* file);
+
+void* MyCalloc (size_t n_elems, size_t size_elems, const void* poison);
+void* MyRecalloc (void* memory, size_t n_elements, size_t size_elements, size_t previous_n_elements, const void* poison);
+
+// soft assert
+#define CustomWarning(expression, return_message) do                                                               \
+{                                                                                                                  \
+    if (!(expression))                                                                                             \
+    {                                                                                                              \
+        fprintf (stderr, "%s: %s:%d: Expression `%s' warning.\n", __FUNCTION__, __FILE__, __LINE__, #expression);  \
+        return return_message;                                                                                     \
+    }                                                                                                              \
+}                                                                                                                  \
+while (0)                                                                                                          \
+
+// hard assert
+#define CustomAssert(expression) do                                                                              \
+{                                                                                                                \
+    if (!(expression))                                                                                           \
+    {                                                                                                            \
+        fprintf (stderr, "%s: %s:%d: Assertion `%s' failed.\n", __FUNCTION__, __FILE__, __LINE__, #expression);  \
+        fprintf (stderr, "Program aborting\n");                                                                  \
+        exit(EXIT_FAILURE);                                                                                      \
+    }                                                                                                            \
+}                                                                                                                \
+while (0)    
 
 #endif // COMMON_ERRORS_H

@@ -1,8 +1,7 @@
 #include "Tokenization.h"
 #include "Parse.h"
 #include "Tree.h"
-#include "CustomAssert.h"
-
+#include "Common.h"
 #define TKN_DATA_(section) token_array[*shift]->data.section
 
 #define GET_RESERVED_(reserved_token, node_name, return_null, expected)                 \
