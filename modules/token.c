@@ -1,39 +1,36 @@
+#include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "token.h"
 
 //--------------------------------------------------------------------------
 
-int FindKeywordByName (const char* name_begin, size_t name_len, token_t* data)
+keyword_t StringToKeyword (const char* string_begin, size_t string_len)
 {
-    assert (name_begin != NULL);
-    assert (data != NULL);
+    assert (string_begin != NULL);
+
+    keyword_t keyword = 0;
 
     for (size_t i = 0; i < sizeof (keyword_mappings) / sizeof (keyword_mappings[0]); ++i)
     {
-        if (strncmp (name_begin, keyword_mappings[i].string, name_len) == 0)
+        if (strncmp (string_begin, keyword_mappings[i].string, string_len) == 0)
         {
-            data->token_type = KEYWORD;
-            data->content.keyword = keyword_mappings[i].keyword;
-            return 0;
+            keyword = keyword_mappings[i].keyword;
+            return keyword;
         }
     }
 
-    return -1;
+    return keyword;
 }
 
 //--------------------------------------------------------------------------
 
-const char* FindNameByKeyword (token_t data)
+const char* KeywordToString (keyword_t keyword)
 {
-    if (data.token_type != KEYWORD)
-    {
-        return NULL;
-    }
-
     for (size_t i = 0; i < sizeof (keyword_mappings) / sizeof (keyword_mappings[0]); ++i)
     {
-        if (data.content.keyword == keyword_mappings[i].keyword)
+        if (keyword == keyword_mappings[i].keyword)
         {
             return keyword_mappings[i].string;
         }
@@ -41,3 +38,5 @@ const char* FindNameByKeyword (token_t data)
 
     return NULL;
 }
+
+//--------------------------------------------------------------------------

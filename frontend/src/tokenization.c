@@ -11,7 +11,7 @@
 //--------------------------------------------------------------------------
 
 #define TOKEN_INIT(token_data)                                                      \
-    token_array[tkn_arr_shift] = (tree_node_t*) calloc (1, sizeof (tree_node_t));   \
+    token_array[tkn_arr_shift] = (ast_node_t*) calloc (1, sizeof (ast_node_t));   \
     token_array[tkn_arr_shift]->data = token_data;                                  \
     tkn_arr_shift += 1;                                                             \
     if (tkn_arr_shift >= tkn_arr_size)                                              \
@@ -26,7 +26,7 @@ void FrontendInit (frontend_t* frontend)
 {
     assert (frontend != NULL);
 
-    frontend->names_table = (name_t*) calloc (NAMES_TABLE_SIZE, sizeof (name_t));
+    frontend->names_table = (identifier_t*) calloc (NAMES_TABLE_SIZE, sizeof (identifier_t));
     CUSTOM_ASSERT (frontend->names_table != NULL);
 
     frontend->names_table_size = NAMES_TABLE_SIZE;
@@ -37,13 +37,13 @@ void FrontendInit (frontend_t* frontend)
 
 //--------------------------------------------------------------------------
 
-tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
+ast_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
 {
     assert (buf != NULL);
 
     size_t buf_shift = 0;
 
-    tree_node_t** token_array = (tree_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (tree_node_t*));
+    ast_node_t** token_array = (ast_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (ast_node_t*));
     CUSTOM_ASSERT (token_array != NULL);
 
     size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
@@ -76,7 +76,7 @@ tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
             // если не нашлось такое зарезервированное имя, то заполняем токен именем
             if (FindReservedDataByName (buf + buf_shift, name_len, &token_data) != 0)
             {
-                name_t name_struct = {.begin = buf + buf_shift, .len = name_len};
+                identifier_t name_struct = {.begin = buf + buf_shift, .len = name_len};
                 name_struct.index = FindNameIndex (frontend, &name_struct);
                 CUSTOM_WARNING (name_struct.index != -1, NULL);
                 token_data.type = NAME;
@@ -136,7 +136,7 @@ tree_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
 
 //--------------------------------------------------------------------------
 
-int FindNameIndex (frontend_t* frontend, name_t* name)
+int FindNameIndex (frontend_t* frontend, identifier_t* name)
 {
     CUSTOM_ASSERT (name != NULL);
 
@@ -164,13 +164,13 @@ int FindNameIndex (frontend_t* frontend, name_t* name)
 
 //--------------------------------------------------------------------------
 
-tree_node_t** TokenArrayResize (tree_node_t** token_array, size_t* token_arr_size)
+ast_node_t** TokenArrayResize (ast_node_t** token_array, size_t* token_arr_size)
 {
     CUSTOM_ASSERT (token_array  != NULL);
     CUSTOM_ASSERT (token_arr_size != NULL);
 
-    const tree_node_t* POISON = NULL;
-    token_array = (tree_node_t**) MyRecalloc (token_array, *token_arr_size * 2, sizeof (tree_node_t*), *token_arr_size, &POISON);
+    const ast_node_t* POISON = NULL;
+    token_array = (ast_node_t**) MyRecalloc (token_array, *token_arr_size * 2, sizeof (ast_node_t*), *token_arr_size, &POISON);
     CUSTOM_WARNING (token_array != NULL, NULL);
     *token_arr_size *= 2;
 
@@ -179,13 +179,13 @@ tree_node_t** TokenArrayResize (tree_node_t** token_array, size_t* token_arr_siz
 
 //--------------------------------------------------------------------------
 
-name_t* NamesArrayResize (frontend_t* frontend, size_t* arr_size)
+identifier_t* NamesArrayResize (frontend_t* frontend, size_t* arr_size)
 {
     CUSTOM_ASSERT (frontend != NULL);
     CUSTOM_ASSERT (arr_size    != NULL);
 
-    const name_t* POISON = NULL;
-    frontend->names_table = (name_t*) MyRecalloc (frontend->names_table, *arr_size * 2, sizeof (tree_node_t*), *arr_size, &POISON);
+    const identifier_t* POISON = NULL;
+    frontend->names_table = (identifier_t*) MyRecalloc (frontend->names_table, *arr_size * 2, sizeof (ast_node_t*), *arr_size, &POISON);
     CUSTOM_WARNING (frontend->names_table != NULL, NULL);
     *arr_size *= 2;
 
@@ -194,7 +194,7 @@ name_t* NamesArrayResize (frontend_t* frontend, size_t* arr_size)
 
 //--------------------------------------------------------------------------
 
-void TokenArrayDestroy (tree_node_t** token_array)
+void TokenArrayDestroy (ast_node_t** token_array)
 {   
     int i = 0;
     while ((token_array[i]->data.type != RESERVED) || (token_array[i]->data.content.reserved != END))

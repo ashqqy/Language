@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "common.h"
 #include "parse.h"
 #include "tokenization.h"
-#include "tree.h"
+
+#include "common.h"
+#include "ast.h"
+#include "token.h"
 
 //----------------------------------------------------------------------------
 
@@ -25,20 +27,20 @@ int main (const int argc, const char* argv[])
     frontend_t frontend = {};
     FrontendInit (&frontend);
 
-    tree_node_t** token_array = Tokenization (source_code_buffer, source_code_buffer_size, &frontend);
+    ast_node_t** token_array = Tokenization (source_code_buffer, source_code_buffer_size, &frontend);
     CUSTOM_WARNING (token_array != NULL, TOKENIZATION_ERROR);
 
     size_t shift = 0;
-    tree_node_t* ast_root_node = GetProgram (token_array, &shift);
+    ast_node_t* ast_root_node = GetProgram (token_array, &shift);
 
     FILE* dump_file = fopen ("./dump/dump.dot", "w");
     CUSTOM_ASSERT (source_code_file != NULL);
-    TreeDump (dump_file, ast_root_node);
+    AstGraphvizDump (dump_file, ast_root_node);
     fclose (dump_file);
 
-    FILE* ast_file = fopen ("./dump/AST.txt", "w");
+    FILE* ast_file = fopen ("./dump/serialized.ast", "w");
     CUSTOM_ASSERT (ast_file != NULL);
-    TreeOutput (ast_file, ast_root_node);
+    AstSerialize (ast_file, ast_root_node);
     fclose (ast_file);
 
     FREE (frontend.names_table);

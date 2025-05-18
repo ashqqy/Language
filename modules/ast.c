@@ -1,0 +1,292 @@
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "ast.h"
+
+#include "token.h"
+#include "common.h"
+
+//------------------------------------------------------
+
+static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node);
+static void AstNodesGraphvizLink (FILE* dump_file, ast_node_t* node);
+
+static ast_node_t* DeserializeNodes (char* buffer, int* shift);
+
+//------------------------------------------------------
+
+ast_node_t* NodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_node)
+{
+    ast_node_t* node = (ast_node_t*) calloc (1, sizeof (ast_node_t));
+    CUSTOM_ASSERT (node != NULL);
+
+    node->data  = data;
+    node->left  = left_node;
+    node->right = right_node;
+
+    return node;
+}
+//------------------------------------------------------
+
+void NodeLink (ast_node_t* node, ast_node_t** node_to_link_to)
+{
+    assert (node != NULL);
+    assert (node_to_link_to != NULL);
+
+    *node_to_link_to = node;
+}
+
+//------------------------------------------------------
+
+void TreeDestroy (ast_node_t* node)
+{
+    if (node == NULL)
+        return;
+
+    TreeDestroy (node->left);
+    TreeDestroy (node->right);
+
+    FREE (node);
+}
+
+//------------------------------------------------------
+
+void AstSerialize (FILE* output_file, ast_node_t* node)
+{
+    assert (output_file != NULL);
+
+    if (node == NULL)
+    {
+        fprintf (output_file, "_ ");
+        return;
+    }
+
+    fprintf (output_file, "( ");
+    fprintf (output_file, "%d ", node->data.token_type);
+
+    switch (node->data.token_type)
+    {
+        case CONSTANT:
+        {
+            fprintf (output_file, "%lg ", node->data.content.constant);
+            break;
+        }
+
+        case IDENTIFIER:
+        {
+            fprintf (output_file, "%d ", node->data.content.identifier.index);
+            break;
+        }
+
+        case KEYWORD:
+        {
+            fprintf (output_file, "%d ", node->data.content.keyword);
+            break;
+        }
+    }
+
+    AstSerialize (output_file, node->left);
+    AstSerialize (output_file, node->right);
+
+    fprintf (output_file, ") ");
+}
+
+ast_node_t* AstDeserialize (FILE* input_file)
+{
+    assert (input_file != NULL);
+
+    size_t buffer_size = 0;
+    char* buffer = ReadFile (input_file, &buffer_size);
+    CUSTOM_WARNING (buffer != NULL, NULL);
+
+    int shift = 0;
+    ast_node_t* root_node = DeserializeNodes (buffer, &shift);
+
+    FREE (buffer);
+
+    return root_node;
+}
+
+static ast_node_t* DeserializeNodes (char* buffer, int* shift)
+{
+    assert (buffer != NULL);
+    assert (shift != NULL);
+
+    token_t node_data = {};
+
+    if (buffer[*shift] == '(')
+    {
+        *shift += 2;
+
+        int token_type = 0;
+        int token_type_len = 0;
+        sscanf (buffer + *shift, "%d%n", &token_type, &token_type_len);
+
+        node_data.token_type = (token_type_t) token_type;
+        *shift += token_type_len + 1;
+
+        switch (node_data.token_type)
+        {
+            case KEYWORD:
+            {
+                int keyword = 0;
+                int keyword_len = 0;
+                sscanf (buffer + *shift, "%d%n", &keyword, &keyword_len);
+
+                node_data.content.keyword = (keyword_t) keyword;
+                *shift += keyword_len + 1;
+
+                break;
+            }
+
+            case IDENTIFIER:
+            {
+                int identifier_index = -1;
+                int identifier_len = 0;
+                sscanf (buffer + *shift, "%d%n", &identifier_index, &identifier_len);
+
+                node_data.content.identifier.index = identifier_index;
+                *shift += identifier_len + 1;
+
+                break;
+            }
+
+            case CONSTANT:
+            {
+                double constant = 0;
+                int constant_len = 0;
+                sscanf (buffer + *shift, "%lf%n", &constant, &constant_len);
+
+                node_data.content.constant = constant;
+                *shift += constant_len + 1;
+
+                break;
+            }
+        }
+
+        ast_node_t* left_node  = DeserializeNodes (buffer, shift);
+        ast_node_t* right_node = DeserializeNodes (buffer, shift);
+
+        if (buffer[*shift] == ')')
+        {
+            *shift += 2;
+            return NodeCreate (node_data, left_node, right_node);
+        }
+
+        else
+        {
+            CUSTOM_ASSERT ("Deserializing error: Expected close bracket" && 0);
+        }
+    }
+
+    else if (buffer[*shift] == '_')
+    {
+        *shift += 2;
+        return NULL;
+    }
+
+    else
+    {
+        CUSTOM_ASSERT ("Deserializing error: Expected node" && 0);
+    }
+}
+
+//------------------------------------------------------
+
+void AstGraphvizDump (FILE* dump_file, ast_node_t* root_node)
+{
+    assert (dump_file != NULL);
+    assert (root_node != NULL);
+
+    fprintf (dump_file, "digraph G\n");
+    fprintf (dump_file, "{\n");
+    fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+
+    AstNodesGraphvizDump (dump_file, root_node);
+    fprintf (dump_file, "\n");
+
+    AstNodesGraphvizLink (dump_file, root_node);
+    fprintf (dump_file, "}\n");
+
+    const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png";
+    system(command);
+}
+
+void TokenArrayGraphvizDump (FILE* dump_file, ast_node_t** token_array)
+{
+    assert (token_array != NULL);
+
+    fprintf (dump_file, "digraph G\n");
+    fprintf (dump_file, "{\n");
+    fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+
+    for (int i = 0; !(token_array[i]->data.token_type == KEYWORD && token_array[i]->data.content.keyword == END); ++i)
+    {
+        AstNodesGraphvizDump(dump_file, token_array[i]);
+    }
+
+    fprintf (dump_file, "}\n");
+
+    const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png"; // linux
+    system (command);
+}
+
+//------------------------------------------------------
+
+static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
+{
+    assert (dump_file != NULL);
+
+    if (node == NULL)
+        return;
+
+    switch (node->data.token_type)
+    {
+        case CONSTANT: 
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
+                    node, node, "CONSTANT", node->data.content.constant);
+            break;
+        }
+
+        case IDENTIFIER:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
+                    node, node, "IDENTIFIER", node->data.content.identifier.index);
+            break;
+        }
+
+        case KEYWORD:
+        {
+            const char* keyword_string = KeywordToString (node->data.content.keyword);
+
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %s | { <l>left|<r>right } }\"];\n", 
+                    node, node, "KEYWORD", keyword_string);
+            break;
+        }
+    }
+    
+    AstNodesGraphvizDump (dump_file, node->left);
+    AstNodesGraphvizDump (dump_file, node->right);
+}
+
+static void AstNodesGraphvizLink (FILE* dump_file, ast_node_t* node)
+{   
+    assert (dump_file != NULL);
+    assert (node != NULL);
+
+    if (node->left  != NULL) 
+    {
+        fprintf (dump_file, "p%p:<l> -> p%p\n", node, node->left);
+        AstNodesGraphvizLink (dump_file, node->left);
+    }
+    if (node->right != NULL) 
+    {
+        fprintf (dump_file, "p%p:<r> -> p%p\n", node, node->right);
+        AstNodesGraphvizLink (dump_file, node->right);
+    }
+}
+
+//------------------------------------------------------

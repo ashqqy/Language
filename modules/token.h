@@ -11,20 +11,6 @@ typedef struct keyword_mapping keyword_mapping_t;
 
 //--------------------------------------------------------------------------
 
-struct token
-{
-    token_type_t token_type;
-
-    union
-    {
-        double       constant;
-        identifier_t identifier; 
-        keyword_t    keyword;
-    } content;
-};
-
-//--------------------------------------------------------------------------
-
 enum token_type
 {
     CONSTANT   = 1,
@@ -36,9 +22,9 @@ enum token_type
 
 struct identifier
 {
-    char*  identifier_begin;
-    size_t identifier_lenght;
-    int    identifier_index;
+    char*  begin;
+    size_t length;
+    int    index;
 };
 
 //--------------------------------------------------------------------------
@@ -92,6 +78,22 @@ enum keyword
     BLOCK_CLOSE         = 94,
 };
 
+//--------------------------------------------------------------------------
+
+struct token
+{
+    token_type_t token_type;
+
+    union
+    {
+        double       constant;
+        identifier_t identifier; 
+        keyword_t    keyword;
+    } content;
+};
+
+//--------------------------------------------------------------------------
+
 struct keyword_mapping
 {
     const char* string;
@@ -143,12 +145,12 @@ static const keyword_mapping_t keyword_mappings[] =
     {.string = "(",           .keyword = LEFT_BRACKET},
     {.string = ")",           .keyword = RIGHT_BRACKET},
     {.string = "{",           .keyword = BLOCK_OPEN},
-    {.string = "}",           .keyword = BLOCK_CLOSE},
+    {.string = "}",           .keyword = BLOCK_CLOSE}
 };
 
 //--------------------------------------------------------------------------
 
-int         FindKeywordByName (const char* name_begin, size_t name_len, token_t* keyword);
-const char* FindNameByKeyword (token_t keyword);
+keyword_t   StringToKeyword (const char* string_begin, size_t string_len);
+const char* KeywordToString (keyword_t keyword);
 
 #endif // TOKEN_H
