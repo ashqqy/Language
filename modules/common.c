@@ -1,13 +1,13 @@
 #include <string.h>
 
-#include "Common.h"
+#include "common.h"
 
 //--------------------------------------------------------------------------
 
 int FindReservedDataByName (const char* name_begin, size_t name_len, tree_data_t* data)
 {
-    CustomAssert (name_begin != NULL);
-    CustomAssert (data != NULL);
+    CUSTOM_ASSERT (name_begin != NULL);
+    CUSTOM_ASSERT (data != NULL);
 
     for (size_t i = 0; i < sizeof (reserved_names) / sizeof (reserved_names[0]); ++i)
     {
@@ -66,7 +66,7 @@ char* ReadFile (FILE* file_input, size_t* n_readen)
 
 size_t FileSizeFinder (FILE* file)
 {
-    fseek (file, 0L, SEEK_END); //лучше fstat
+    fseek (file, 0L, SEEK_END);
     size_t size_file = (size_t) ftell(file);
     fseek(file, 0L, SEEK_SET);
 

@@ -1,9 +1,10 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "Common.h"
-#include "Tree.h"
+#include "common.h"
+#include "tree.h"
 
 //------------------------------------------------------
 
@@ -23,8 +24,8 @@ tree_node_t* NodeCreate (tree_data_t data, tree_node_t* left_node, tree_node_t* 
 
 tree_node_t* NodeLink (tree_node_t* node, tree_node_t** node_to_link_to)
 {
-    CustomAssert (node            != NULL);
-    CustomAssert (node_to_link_to != NULL);
+    CUSTOM_ASSERT (node            != NULL);
+    CUSTOM_ASSERT (node_to_link_to != NULL);
 
     *node_to_link_to = node;
 
@@ -35,7 +36,7 @@ tree_node_t* NodeLink (tree_node_t* node, tree_node_t** node_to_link_to)
 
 tree_node_t* NodeEditData (tree_node_t* node, tree_data_t new_data)
 {
-    CustomAssert (node != NULL);
+    CUSTOM_ASSERT (node != NULL);
 
     node->data = new_data;
 
@@ -46,9 +47,9 @@ tree_node_t* NodeEditData (tree_node_t* node, tree_data_t new_data)
 
 tree_node_t* SubtreeCopy (tree_node_t* node)
 {
-    CustomAssert (node != NULL);
+    CUSTOM_ASSERT (node != NULL);
 
-    tree_node_t* node_copy = NodeCreate (node->data);
+    tree_node_t* node_copy = NodeCreate (node->data, NULL, NULL);
 
     if (node->left != NULL)
     {
@@ -80,12 +81,10 @@ void TreeDestroy (tree_node_t* node)
 
 //------------------------------------------------------
 
-void TreeDump (tree_node_t* root_node)
+void TreeDump (FILE* dump_file, tree_node_t* root_node)
 {
-    CustomAssert (root_node != NULL);
-
-    FILE* dump_file = fopen ("./dump/dump.dot", "w");
-    CustomWarning (dump_file != NULL, ;);
+    assert (dump_file != NULL);
+    assert (root_node != NULL);
 
     fprintf (dump_file, "digraph G\n");
     fprintf (dump_file, "{\n");
@@ -102,8 +101,6 @@ void TreeDump (tree_node_t* root_node)
 
     fprintf (dump_file, "}\n");
 
-    fclose (dump_file);
-
     const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png"; // linux
     // const char command[81] = "\"C:/Program Files/Graphviz/bin/dot.exe\" ./dump/dump.dot -Tpng -o ./dump/dump.png"; // windows
     system(command);
@@ -111,7 +108,7 @@ void TreeDump (tree_node_t* root_node)
 
 void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
 {
-    CustomAssert (dump_file != NULL);
+    CUSTOM_ASSERT (dump_file != NULL);
 
     if (node == NULL)
         return;
@@ -151,7 +148,7 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
 
 void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node)
 {   
-    CustomAssert (dump_file != NULL);
+    CUSTOM_ASSERT (dump_file != NULL);
 
     if (node->left  != NULL) 
     {
@@ -169,10 +166,10 @@ void TreeNodeLinkDump (FILE* dump_file, tree_node_t* node)
 
 void TreeArrayDump (tree_node_t** array)
 {
-    CustomAssert (array != NULL);
+    CUSTOM_ASSERT (array != NULL);
 
     FILE* dump_file = fopen ("./Dump/dump.dot", "w");
-    CustomWarning (dump_file != NULL, ;);
+    CUSTOM_WARNING (dump_file != NULL, ;);
 
     fprintf (dump_file, "digraph G\n");
     fprintf (dump_file, "{\n");
@@ -199,7 +196,7 @@ void TreeArrayDump (tree_node_t** array)
 
 void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
 {
-    CustomAssert (dump_file != NULL);
+    CUSTOM_ASSERT (dump_file != NULL);
 
     const char* node_data = FindReservedNameByData (node->data);
 
@@ -235,8 +232,8 @@ void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
 
 void TreeOutput (FILE* output_file, tree_node_t* node)
 {
-    CustomAssert (output_file != NULL);
-    CustomAssert (node        != NULL);
+    CUSTOM_ASSERT (output_file != NULL);
+    CUSTOM_ASSERT (node        != NULL);
 
     fprintf (output_file, "( ");
     fprintf (output_file, "%d ", node->data.type);
@@ -263,11 +260,11 @@ void TreeOutput (FILE* output_file, tree_node_t* node)
 
 tree_node_t* TreeInput (FILE* database)
 {
-    CustomAssert (database != NULL);
+    CUSTOM_ASSERT (database != NULL);
 
     size_t buf_size = 0;
     char* buf = ReadFile (database, &buf_size);
-    CustomWarning (buf != NULL, NULL);
+    CUSTOM_WARNING (buf != NULL, NULL);
     fclose (database);
 
     size_t shift = 0;
@@ -281,8 +278,8 @@ tree_node_t* TreeInput (FILE* database)
 
 tree_node_t* ReadNode (char* buf, size_t* shift)
 {
-    CustomAssert (buf != NULL);
-    CustomAssert (shift != NULL);
+    CUSTOM_ASSERT (buf != NULL);
+    CUSTOM_ASSERT (shift != NULL);
 
     tree_data_t node_data = {};
 
@@ -329,7 +326,7 @@ tree_node_t* ReadNode (char* buf, size_t* shift)
         }
         else
         {
-            CustomAssert ("expected close bracket" && 0);
+            CUSTOM_ASSERT ("expected close bracket" && 0);
         }
     }
 

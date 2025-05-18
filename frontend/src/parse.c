@@ -1,7 +1,8 @@
-#include "Tokenization.h"
-#include "Parse.h"
-#include "Tree.h"
-#include "Common.h"
+#include "tokenization.h"
+#include "parse.h"
+#include "tree.h"
+#include "common.h"
+
 #define TKN_DATA_(section) token_array[*shift]->data.section
 
 #define GET_RESERVED_(reserved_token, node_name, return_null, expected)                 \
@@ -22,8 +23,8 @@
 
 tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* root_node = GetStatements (token_array, shift, END);
 
@@ -32,8 +33,8 @@ tree_node_t* GetProgram (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* if_node = GetIf (token_array, shift);
     if (if_node != NULL)
@@ -53,8 +54,8 @@ tree_node_t* GetStatement (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetStatements (tree_node_t** token_array, size_t* shift, reserved_t end_token)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* root_node = GetStatement (token_array, shift);
     tree_node_t* join_node = root_node;
@@ -70,8 +71,8 @@ tree_node_t* GetStatements (tree_node_t** token_array, size_t* shift, reserved_t
 
 tree_node_t* GetPrint (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     GET_RESERVED_ (PRINT, print_node, 1, 'print');
     GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
@@ -89,8 +90,8 @@ tree_node_t* GetPrint (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     GET_RESERVED_ (IF, if_node, 1, 'if');
     GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
@@ -135,8 +136,8 @@ tree_node_t* GetIf (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     GET_RESERVED_ (WHILE, while_node, 1, 'while');
     GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
@@ -161,8 +162,8 @@ tree_node_t* GetWhile (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetBool (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* left_node  = GetBoolP1 (token_array, shift);
     tree_node_t* comp_node  = GetCompare (token_array, shift);
@@ -176,8 +177,8 @@ tree_node_t* GetBool (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetBoolP1 (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* num_node = GetMath (token_array, shift);
     if (num_node != NULL)
@@ -189,8 +190,8 @@ tree_node_t* GetBoolP1 (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetCompare (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     if ((TKN_DATA_ (type) == RESERVED) &&      
         (TKN_DATA_ (content.reserved) == EQ  || TKN_DATA_ (content.reserved) == NEQ ||
@@ -208,8 +209,8 @@ tree_node_t* GetCompare (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetVarInit (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* type_node = GetType (token_array, shift);
 
@@ -230,8 +231,8 @@ tree_node_t* GetVarInit (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetType (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     if (TKN_DATA_ (type) == RESERVED && (TKN_DATA_ (content.reserved) == INT || TKN_DATA_ (content.reserved) == DBL))
     {
@@ -246,8 +247,8 @@ tree_node_t* GetType (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetAsg (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* name_node = GetName (token_array, shift);
 
@@ -269,8 +270,8 @@ tree_node_t* GetAsg (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetName (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     if (TKN_DATA_ (type) == NAME)
     {
@@ -284,8 +285,8 @@ tree_node_t* GetName (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetNum (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     if (TKN_DATA_ (type) == RESERVED && TKN_DATA_ (content.reserved) == SUB)
     {
@@ -318,8 +319,8 @@ tree_node_t* GetNum (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetMath (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* math_node = GetPlus (token_array, shift);
 
@@ -328,8 +329,8 @@ tree_node_t* GetMath (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetPlus (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* first_node = GetMult (token_array, shift);
     if ((TKN_DATA_ (type) == RESERVED) && (TKN_DATA_ (content.reserved) == ADD || TKN_DATA_ (content.reserved) == SUB))
@@ -349,8 +350,8 @@ tree_node_t* GetPlus (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetMult (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* first_node = GetDeg (token_array, shift);
 
@@ -372,8 +373,8 @@ tree_node_t* GetMult (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetDeg (tree_node_t** token_array, size_t* shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     tree_node_t* first_node = GetBracket (token_array, shift);
 
@@ -395,8 +396,8 @@ tree_node_t* GetDeg (tree_node_t** token_array, size_t* shift)
 
 tree_node_t* GetBracket (tree_node_t** token_array, size_t* const shift)
 {
-    CustomAssert (token_array != NULL);
-    CustomAssert (shift       != NULL);
+    CUSTOM_ASSERT (token_array != NULL);
+    CUSTOM_ASSERT (shift       != NULL);
 
     if ((TKN_DATA_ (type) == RESERVED) && 
        (TKN_DATA_ (content.reserved) == LBRACK))
@@ -416,10 +417,5 @@ tree_node_t* GetBracket (tree_node_t** token_array, size_t* const shift)
     else
         return GetName (token_array, shift);
 }
-
-//--------------------------------------------------------------------------
-
-#undef TKN_DATA_
-#undef GET_RESERVED_
 
 //--------------------------------------------------------------------------

@@ -4,30 +4,31 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-enum common_errors
+typedef enum
 {
-    NO_ERRORS          = 1,
-    OPENING_FILE_ERROR = 2,
-    READING_FILE_ERROR = 3,
-    TOKENIZATION_ERROR = 4,
-    ALLOCATION_ERROR   = 5
-};
+    NO_ERRORS           = 1,
+    EXPECTED_INPUT_FILE = 2,
+    OPENING_FILE_ERROR  = 3,
+    READING_FILE_ERROR  = 4,
+    TOKENIZATION_ERROR  = 5,
+    ALLOCATION_ERROR    = 6
+} common_errors;
 
-enum tree_data_type_t
+typedef enum
 {
     NUMBER   = 1,
     NAME     = 2,
     RESERVED = 3
-};
+} tree_data_type_t;
 
-struct name_t
+typedef struct
 {
     char* begin;
     size_t len;
     int index;
-};
+} name_t;
 
-enum reserved_t
+typedef enum
 {
     END     = 1,
 
@@ -63,9 +64,9 @@ enum reserved_t
     ELSE    = 25,
     WHILE   = 26,
     PRINT   = 27
-};
+} reserved_t;
 
-struct tree_data_t
+typedef struct 
 {
     tree_data_type_t type;
 
@@ -75,15 +76,15 @@ struct tree_data_t
         name_t name; 
         reserved_t reserved;
     } content;
-};
+} tree_data_t;
 
-struct reserved_names_t
+typedef struct
 {
     const char* name;
     tree_data_t data;
-};
+} reserved_names_t;
 
-const reserved_names_t reserved_names[] = 
+static const reserved_names_t reserved_names[] = 
 {
     {.name = "(",       .data = {.type = RESERVED, .content = {.reserved = LBRACK}}},
     {.name = ")",       .data = {.type = RESERVED, .content = {.reserved = RBRACK}}},
@@ -128,7 +129,7 @@ void* MyCalloc (size_t n_elems, size_t size_elems, const void* poison);
 void* MyRecalloc (void* memory, size_t n_elements, size_t size_elements, size_t previous_n_elements, const void* poison);
 
 // soft assert
-#define CustomWarning(expression, return_message) do                                                               \
+#define CUSTOM_WARNING(expression, return_message) do                                                              \
 {                                                                                                                  \
     if (!(expression))                                                                                             \
     {                                                                                                              \
@@ -139,7 +140,7 @@ void* MyRecalloc (void* memory, size_t n_elements, size_t size_elements, size_t 
 while (0)                                                                                                          \
 
 // hard assert
-#define CustomAssert(expression) do                                                                              \
+#define CUSTOM_ASSERT(expression) do                                                                             \
 {                                                                                                                \
     if (!(expression))                                                                                           \
     {                                                                                                            \
@@ -148,6 +149,8 @@ while (0)                                                                       
         exit(EXIT_FAILURE);                                                                                      \
     }                                                                                                            \
 }                                                                                                                \
-while (0)    
+while (0)  
+
+#define FREE(ptr) free (ptr); ptr = NULL;
 
 #endif // COMMON_ERRORS_H

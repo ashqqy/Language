@@ -2,66 +2,60 @@ digraph G
 {
 node[shape="record", style="rounded, filled"];
 
-p0x504000000790[label = "{ <ptr> 0x504000000790 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
-p0x504000000650[label = "{ <ptr> 0x504000000650 | <type> RESERVED | <data> \if | { <l>left|<r>right } }"];
-p0x504000000210[label = "{ <ptr> 0x504000000210 | <type> RESERVED | <data> \< | { <l>left|<r>right } }"];
+p0x5040000000d0[label = "{ <ptr> 0x5040000000d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
 p0x504000000010[label = "{ <ptr> 0x504000000010 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
-p0x5040000001d0[label = "{ <ptr> 0x5040000001d0 | <type> RESERVED | <data> \* | { <l>left|<r>right } }"];
-p0x504000000150[label = "{ <ptr> 0x504000000150 | <type> RESERVED | <data> \+ | { <l>left|<r>right } }"];
-p0x504000000050[label = "{ <ptr> 0x504000000050 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
-p0x504000000110[label = "{ <ptr> 0x504000000110 | <type> RESERVED | <data> \^ | { <l>left|<r>right } }"];
-p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
-p0x5040000000d0[label = "{ <ptr> 0x5040000000d0 | <type> NUMBER | <data> 3 | { <l>left|<r>right } }"];
-p0x504000000190[label = "{ <ptr> 0x504000000190 | <type> NUMBER | <data> 8 | { <l>left|<r>right } }"];
-p0x504000000610[label = "{ <ptr> 0x504000000610 | <type> RESERVED | <data> \else | { <l>left|<r>right } }"];
-p0x5040000004d0[label = "{ <ptr> 0x5040000004d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
-p0x504000000490[label = "{ <ptr> 0x504000000490 | <type> RESERVED | <data> \while | { <l>left|<r>right } }"];
-p0x5040000002d0[label = "{ <ptr> 0x5040000002d0 | <type> RESERVED | <data> \== | { <l>left|<r>right } }"];
-p0x504000000250[label = "{ <ptr> 0x504000000250 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
-p0x504000000290[label = "{ <ptr> 0x504000000290 | <type> NUMBER | <data> 6 | { <l>left|<r>right } }"];
-p0x504000000450[label = "{ <ptr> 0x504000000450 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x504000000090[label = "{ <ptr> 0x504000000090 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
+p0x5040000001d0[label = "{ <ptr> 0x5040000001d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x504000000150[label = "{ <ptr> 0x504000000150 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
+p0x504000000110[label = "{ <ptr> 0x504000000110 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
+p0x504000000190[label = "{ <ptr> 0x504000000190 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
+p0x504000000250[label = "{ <ptr> 0x504000000250 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x504000000210[label = "{ <ptr> 0x504000000210 | <type> RESERVED | <data> \while | { <l>left|<r>right } }"];
+p0x5040000002d0[label = "{ <ptr> 0x5040000002d0 | <type> RESERVED | <data> \!= | { <l>left|<r>right } }"];
+p0x504000000290[label = "{ <ptr> 0x504000000290 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
+p0x504000000310[label = "{ <ptr> 0x504000000310 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
+p0x504000000510[label = "{ <ptr> 0x504000000510 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x504000000410[label = "{ <ptr> 0x504000000410 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
-p0x504000000310[label = "{ <ptr> 0x504000000310 | <type> NAME | <data> 2 | { <l>left|<r>right } }"];
-p0x5040000003d0[label = "{ <ptr> 0x5040000003d0 | <type> RESERVED | <data> \+ | { <l>left|<r>right } }"];
-p0x504000000350[label = "{ <ptr> 0x504000000350 | <type> NUMBER | <data> 8 | { <l>left|<r>right } }"];
-p0x504000000390[label = "{ <ptr> 0x504000000390 | <type> NUMBER | <data> 7 | { <l>left|<r>right } }"];
-p0x5040000005d0[label = "{ <ptr> 0x5040000005d0 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x5040000003d0[label = "{ <ptr> 0x5040000003d0 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
+p0x504000000490[label = "{ <ptr> 0x504000000490 | <type> RESERVED | <data> \* | { <l>left|<r>right } }"];
+p0x504000000450[label = "{ <ptr> 0x504000000450 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
+p0x5040000004d0[label = "{ <ptr> 0x5040000004d0 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
+p0x504000000690[label = "{ <ptr> 0x504000000690 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
 p0x504000000590[label = "{ <ptr> 0x504000000590 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
-p0x504000000510[label = "{ <ptr> 0x504000000510 | <type> NAME | <data> 3 | { <l>left|<r>right } }"];
-p0x504000000550[label = "{ <ptr> 0x504000000550 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
-p0x504000000750[label = "{ <ptr> 0x504000000750 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
-p0x504000000710[label = "{ <ptr> 0x504000000710 | <type> RESERVED | <data> \= | { <l>left|<r>right } }"];
-p0x504000000690[label = "{ <ptr> 0x504000000690 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
-p0x5040000006d0[label = "{ <ptr> 0x5040000006d0 | <type> NUMBER | <data> 5 | { <l>left|<r>right } }"];
+p0x504000000550[label = "{ <ptr> 0x504000000550 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
+p0x504000000610[label = "{ <ptr> 0x504000000610 | <type> RESERVED | <data> \- | { <l>left|<r>right } }"];
+p0x5040000005d0[label = "{ <ptr> 0x5040000005d0 | <type> NAME | <data> 0 | { <l>left|<r>right } }"];
+p0x504000000650[label = "{ <ptr> 0x504000000650 | <type> NUMBER | <data> 1 | { <l>left|<r>right } }"];
+p0x504000000810[label = "{ <ptr> 0x504000000810 | <type> RESERVED | <data> \; | { <l>left|<r>right } }"];
+p0x504000000710[label = "{ <ptr> 0x504000000710 | <type> RESERVED | <data> \print | { <l>left|<r>right } }"];
+p0x504000000790[label = "{ <ptr> 0x504000000790 | <type> NAME | <data> 1 | { <l>left|<r>right } }"];
 
-p0x504000000790:<l> -> p0x504000000650
-p0x504000000650:<l> -> p0x504000000210
-p0x504000000210:<l> -> p0x504000000010
-p0x504000000210:<r> -> p0x5040000001d0
+p0x5040000000d0:<l> -> p0x504000000050
+p0x504000000050:<l> -> p0x504000000010
+p0x504000000050:<r> -> p0x504000000090
+p0x5040000000d0:<r> -> p0x5040000001d0
 p0x5040000001d0:<l> -> p0x504000000150
-p0x504000000150:<l> -> p0x504000000050
-p0x504000000150:<r> -> p0x504000000110
-p0x504000000110:<l> -> p0x504000000090
-p0x504000000110:<r> -> p0x5040000000d0
-p0x5040000001d0:<r> -> p0x504000000190
-p0x504000000650:<r> -> p0x504000000610
-p0x504000000610:<l> -> p0x5040000004d0
-p0x5040000004d0:<l> -> p0x504000000490
-p0x504000000490:<l> -> p0x5040000002d0
-p0x5040000002d0:<l> -> p0x504000000250
-p0x5040000002d0:<r> -> p0x504000000290
-p0x504000000490:<r> -> p0x504000000450
-p0x504000000450:<l> -> p0x504000000410
-p0x504000000410:<l> -> p0x504000000310
-p0x504000000410:<r> -> p0x5040000003d0
-p0x5040000003d0:<l> -> p0x504000000350
-p0x5040000003d0:<r> -> p0x504000000390
-p0x504000000610:<r> -> p0x5040000005d0
-p0x5040000005d0:<l> -> p0x504000000590
-p0x504000000590:<l> -> p0x504000000510
-p0x504000000590:<r> -> p0x504000000550
-p0x504000000790:<r> -> p0x504000000750
-p0x504000000750:<l> -> p0x504000000710
-p0x504000000710:<l> -> p0x504000000690
-p0x504000000710:<r> -> p0x5040000006d0
+p0x504000000150:<l> -> p0x504000000110
+p0x504000000150:<r> -> p0x504000000190
+p0x5040000001d0:<r> -> p0x504000000250
+p0x504000000250:<l> -> p0x504000000210
+p0x504000000210:<l> -> p0x5040000002d0
+p0x5040000002d0:<l> -> p0x504000000290
+p0x5040000002d0:<r> -> p0x504000000310
+p0x504000000210:<r> -> p0x504000000510
+p0x504000000510:<l> -> p0x504000000410
+p0x504000000410:<l> -> p0x5040000003d0
+p0x504000000410:<r> -> p0x504000000490
+p0x504000000490:<l> -> p0x504000000450
+p0x504000000490:<r> -> p0x5040000004d0
+p0x504000000510:<r> -> p0x504000000690
+p0x504000000690:<l> -> p0x504000000590
+p0x504000000590:<l> -> p0x504000000550
+p0x504000000590:<r> -> p0x504000000610
+p0x504000000610:<l> -> p0x5040000005d0
+p0x504000000610:<r> -> p0x504000000650
+p0x504000000250:<r> -> p0x504000000810
+p0x504000000810:<l> -> p0x504000000710
+p0x504000000710:<l> -> p0x504000000790
 }
