@@ -8,7 +8,7 @@
 
 //------------------------------------------------------
 
-tree_node_t* NodeCreate (tree_data_t data, tree_node_t* left_node, tree_node_t* right_node)
+tree_node_t* NodeCreate (node_data_t data, tree_node_t* left_node, tree_node_t* right_node)
 {
     tree_node_t* node = (tree_node_t*) calloc (1, sizeof (tree_node_t));
     if (node == NULL)
@@ -34,7 +34,7 @@ tree_node_t* NodeLink (tree_node_t* node, tree_node_t** node_to_link_to)
 
 //------------------------------------------------------
 
-tree_node_t* NodeEditData (tree_node_t* node, tree_data_t new_data)
+tree_node_t* NodeEditData (tree_node_t* node, node_data_t new_data)
 {
     CUSTOM_ASSERT (node != NULL);
 
@@ -117,24 +117,24 @@ void TreeNodeDescrDump (FILE* dump_file, tree_node_t* node)
 
     switch (node->data.type)
     {
-        case NUMBER: 
+        case CONSTANT: 
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NUMBER", node->data.content.number);
+                    node, node, "CONSTANT", node->data.content.number);
             break;
         }
 
-        case NAME:
+        case IDENTIFIER:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NAME", node->data.content.name.index);
+                    node, node, "IDENTIFIER", node->data.content.name.index);
             break;
         }
 
-        case RESERVED:
+        case KEYWORD:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> \\%s | { <l>left|<r>right } }\"];\n", 
-                    node, node, "RESERVED", node_data);
+                    node, node, "KEYWORD", node_data);
             break;
         }
 
@@ -177,7 +177,7 @@ void TreeArrayDump (tree_node_t** array)
 
     // определяем узлы 
     int i = 0;
-    while (!(array[i]->data.type == RESERVED && array[i]->data.content.reserved == END))
+    while (!(array[i]->data.type == KEYWORD && array[i]->data.content.reserved == END))
     {
         TreeNodeDescrArrayDump (dump_file, array[i]);
         i++;
@@ -202,24 +202,24 @@ void TreeNodeDescrArrayDump (FILE* dump_file, tree_node_t* node)
 
     switch (node->data.type)
     {
-        case NUMBER: 
+        case CONSTANT: 
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NUMBER", node->data.content.number);
+                    node, node, "CONSTANT", node->data.content.number);
             break;
         }
 
-        case NAME:
+        case IDENTIFIER:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
-                    node, node, "NAME", node->data.content.name.index);
+                    node, node, "IDENTIFIER", node->data.content.name.index);
             break;
         }
 
-        case RESERVED:
+        case KEYWORD:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> \\%s | { <l>left|<r>right } }\"];\n", 
-                    node, node, "RESERVED", node_data);
+                    node, node, "KEYWORD", node_data);
             break;
         }
 
@@ -237,12 +237,12 @@ void TreeOutput (FILE* output_file, tree_node_t* node)
 
     fprintf (output_file, "( ");
     fprintf (output_file, "%d ", node->data.type);
-    if (node->data.type == RESERVED)
+    if (node->data.type == KEYWORD)
         fprintf (output_file, "%d ", node->data.content.reserved);
-    if (node->data.type == NAME)
+    if (node->data.type == IDENTIFIER)
         fprintf (output_file, "%d ", node->data.content.name.index);
 
-    if (node->data.type == NUMBER)
+    if (node->data.type == CONSTANT)
         fprintf (output_file, "%g ", node->data.content.number);
 
     if (node->left != NULL)
@@ -281,7 +281,7 @@ tree_node_t* ReadNode (char* buf, size_t* shift)
     CUSTOM_ASSERT (buf != NULL);
     CUSTOM_ASSERT (shift != NULL);
 
-    tree_data_t node_data = {};
+    node_data_t node_data = {};
 
     if (buf[*shift] == '(')
     {
@@ -291,7 +291,7 @@ tree_node_t* ReadNode (char* buf, size_t* shift)
         sscanf (buf + *shift, "%d%n", &type, &len_type);
         node_data.type = (tree_data_type_t) type;
         *shift += (size_t) len_type + 1;
-        if (node_data.type == RESERVED)
+        if (node_data.type == KEYWORD)
         {
             int reserved = 0;
             int len_reserved = 0;
@@ -299,7 +299,7 @@ tree_node_t* ReadNode (char* buf, size_t* shift)
             node_data.content.reserved = (reserved_t) reserved;
             *shift += (size_t) len_reserved + 1;
         }
-        else if (node_data.type == NAME)
+        else if (node_data.type == IDENTIFIER)
         {
             int index = -1;
             int name_len = 0;
@@ -307,7 +307,7 @@ tree_node_t* ReadNode (char* buf, size_t* shift)
             node_data.content.name.index = index;
             *shift += (size_t) name_len + 1;
         }
-        else if (node_data.type == NUMBER)
+        else if (node_data.type == CONSTANT)
         {
             double number = 0;
             int num_len = 0;

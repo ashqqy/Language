@@ -4,50 +4,12 @@
 
 //--------------------------------------------------------------------------
 
-int FindReservedDataByName (const char* name_begin, size_t name_len, tree_data_t* data)
+char* ReadFile (FILE* file, size_t* n_readen)
 {
-    CUSTOM_ASSERT (name_begin != NULL);
-    CUSTOM_ASSERT (data != NULL);
-
-    for (size_t i = 0; i < sizeof (reserved_names) / sizeof (reserved_names[0]); ++i)
-    {
-        if (strncmp (name_begin, reserved_names[i].name, name_len) == 0)
-        {
-            *data = reserved_names[i].data;
-            return 0;
-        }
-    }
-
-    return -1;
-}
-
-//--------------------------------------------------------------------------
-
-const char* FindReservedNameByData (tree_data_t data)
-{
-    #define IFCASE_(data_type, content_type)                                    \
-    if ((data.type == reserved_names[i].data.type && data.type == data_type &&  \
-    data.content.content_type == reserved_names[i].data.content.content_type))  \
-        return reserved_names[i].name
-
-    for (size_t i = 0; i < sizeof (reserved_names) / sizeof (reserved_names[0]); ++i)
-    {
-        IFCASE_ (RESERVED, reserved);
-    }
-
-    return "Not found";
-
-    #undef IFCASE_
-}
-
-//--------------------------------------------------------------------------
-
-char* ReadFile (FILE* file_input, size_t* n_readen)
-{
-    if (file_input == NULL || n_readen == NULL)
+    if (file == NULL || n_readen == NULL)
         return NULL;
 
-    size_t file_size = FileSizeFinder (file_input);
+    size_t file_size = FindFileSize (file);
     if (file_size == 0)
         return NULL;
 
@@ -55,20 +17,18 @@ char* ReadFile (FILE* file_input, size_t* n_readen)
     if (buffer == NULL)
         return NULL;
 
-    *n_readen = fread (buffer, sizeof (char), file_size, file_input);
+    *n_readen = fread (buffer, sizeof (char), file_size, file);
     if (*n_readen != file_size)
         return NULL;
 
     return buffer;
 }
 
-//--------------------------------------------------------------------------
-
-size_t FileSizeFinder (FILE* file)
+size_t FindFileSize (FILE* file)
 {
     fseek (file, 0L, SEEK_END);
-    size_t size_file = (size_t) ftell(file);
-    fseek(file, 0L, SEEK_SET);
+    size_t size_file = (size_t) ftell (file);
+    fseek (file, 0L, SEEK_SET);
 
     return size_file;
 }
@@ -82,8 +42,6 @@ void* MyCalloc (size_t n_elems, size_t size_elems, const void* poison)
         memcpy ((char*) mem_ptr + i * size_elems, poison, size_elems);
     return mem_ptr;
     }
-
-//--------------------------------------------------------------------------
 
 void* MyRecalloc (void* memory, size_t n_elements, size_t size_elements, size_t previous_n_elements, const void* poison)
     {
