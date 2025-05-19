@@ -1,27 +1,36 @@
 //----------------------------------------------------------------------------
 
 Main Rules
-    <PROGRAM>    ::= { <FUNCTION> }
-    <FUNCTION>   ::= <NAME> "(" <ARGUMENTS> ")" "{" { <STATEMENT> } "}"
-    <STATEMENT>  ::= <ASSIGNMENT> | <IF> | <WHILE> | <CALL> | <RETURN> 
+    <PROGRAM>             ::= { <TOP_LEVEL> }
+    <TOP_LEVEL>           ::= ( <FUNCTION_DEFINITION> | <VARIABLE_ASSIGNMENT> )
+    <FUNCTION_DEFINITION> ::= <TYPE> <IDENTIFIER> "(" <DEFINITION_ARGUMENTS> ")" "{" <STATEMENTS> "}"
+    <VARIABLE_ASSIGNMENT> ::= [ <TYPE> ] <ASSIGNMENT> ";"
+    <STATEMENTS>          ::= { <STATEMENT> }
+    <STATEMENT>           ::= ( <VARIABLE_ASSIGNMENT> | <IF> | <WHILE> | <FUNCTION_CALL> | <RETURN> | <PRINT> | <INPUT>)
 
-Structural analysis
-    <ASSIGNMENT> ::= [ "variable" ] <NAME> "=" <EXPRESSION> ";"
-    <IF>         ::= "if"    "(" <COMPARE> ")" "{" { <STATEMENT> } "}" [ "else" "{" { <STATEMENT> } "}" ]
-    <WHILE>      ::= "while" "(" <COMPARE> ")" "{" { <STATEMENT> } "}"
-    <CALL>       ::= <NAME>  "(" <ARGUMENTS> ")" ";"
-    <RETURN>     ::= "return" <EXPRESSION> ";"
+Statement rules
+    <IF>            ::= "if"    "(" <BOOL> ")" "{" { <STATEMENT> } "}" [ "else" "{" { <STATEMENT> } "}" ]
+    <WHILE>         ::= "while" "(" <BOOL> ")" "{" { <STATEMENT> } "}"
+    <FUNCTION_CALL> ::= <IDENTIFIER>  "(" <CALL_ARGUMENTS> ")" ";"
+    <RETURN>        ::= "return" <EXPRESSION> ";"
+    <PRINT>         ::= "print" "(" <EXPRESSION> ")"
+    <INPUT>         ::= "input" "(" <IDENTIFIER> ")"
 
-Expression analysis
-    <COMPARE>    ::= <EXPRESSION> [ ( "==" | "<" | ">" | "<=" | ">=" | "!=" ) <EXPRESSION> ]
-    <EXPRESSION> ::= <TERM>    { ( "+" | "-" ) <TERM>    }
-    <TERM>       ::= <PRIMARY> { ( "*" | "/" ) <PRIMARY> }
-    <PRIMARY>    ::= ( "(" <EXPRESSION> ")" | <NAME> | <CONSTANT> )
+Expression rules
+    <BOOL_EXPRESSION> ::= <EXPRESSION> [ <COMPARE_OPERATOR> <EXPRESSION> ]
+
+    <EXPRESSION> ::= <TERM>    [ ( "+" | "-" ) <EXPRESSION> ]
+    <TERM>       ::= <PRIMARY> [ ( "*" | "/" ) <TERM> ]
+    <PRIMARY>    ::= ( "(" <EXPRESSION> ")" | <IDENTIFIER> | <CONSTANT> )
+    <CONSTANT>   ::= constant
 
 Support rules
-    <CONSTANT>   ::= constant
-    <NAME>       ::= identifier
-    <ARGUMENTS>  ::= { <EXPRESSION> { "," <EXPRESSION> } }
+    <ASSIGNMENT>           ::= <IDENTIFIER> "=" <EXPRESSION>
+    <CALL_ARGUMENTS>       ::= { <EXPRESSION> { "," <EXPRESSION> } }
+    <DEFINITION_ARGUMENTS> ::= { <TYPE> <IDENTIFIER> { "," <TYPE> <IDENTIFIER> } }
+    <TYPE>                 ::= ( "void" | "double" )
+    <COMPARE_OPERATOR>     ::= ( "==" | "<" | ">" | "<=" | ">=" | "!=" )
+    <IDENTIFIER>           ::= identifier
 
 //----------------------------------------------------------------------------
 
@@ -32,16 +41,14 @@ Support rules
 // <BOOL_AND>        ::= <BOOL_NOT> { "&&" <BOOL_NOT> }
 // <BOOL_NOT>        ::= "!" { <BOOL_COMPARE> }
 // <BOOL_COMPARE>    ::= <BOOL_PRIMARY> [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) <BOOL_PRIMARY> ]
-// <BOOL_PRIMARY>    :: = ( "(" <BOOL_EXPRESSION> ")" | <CONSTANT> | <NAME> )
+// <BOOL_PRIMARY>    :: = ( "(" <BOOL_EXPRESSION> ")" | <CONSTANT> | <IDENTIFIER> )
 
 // 2. Detailed description
 // <Constant>   ::= [ "-" ] { <Digit> }+ ["." { <Digit> }+ ]
-// <Name>       ::= { <Letter> }
+// <IDENTIFIER>       ::= { <Letter> }
 
 // <Digit> ::= "0"-"9"
 // <Letter> ::= { ("A"-"Z" | "a"-"z" ) }
 // <Symbol> ::= ( "(" | ")" | ";" | "=" | "-" | "." )
-
-3. return, локальные переменные, 
 
 //----------------------------------------------------------------------------

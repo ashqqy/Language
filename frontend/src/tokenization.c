@@ -5,20 +5,27 @@
 
 #include "tokenization.h"
 
+#include "ast.h"
+#include "token.h"
 #include "common.h"
-#include "tree.h"
 
 //--------------------------------------------------------------------------
 
-#define TOKEN_INIT(token_data)                                                      \
-    token_array[tkn_arr_shift] = (ast_node_t*) calloc (1, sizeof (ast_node_t));   \
-    token_array[tkn_arr_shift]->data = token_data;                                  \
-    tkn_arr_shift += 1;                                                             \
-    if (tkn_arr_shift >= tkn_arr_size)                                              \
-    {                                                                               \
-        token_array = TokenArrayResize (token_array, &tkn_arr_size);                \
-        CUSTOM_WARNING (token_array != NULL, NULL);                                 \
-    }
+static const size_t TOKEN_ARRAY_INITIAL_CAPACITY = 100;
+static const size_t NAME_TABLE_INITIAL_CAPACITY  = 10;
+
+static const size_t INCREASE_FACTOR = 2;
+
+//--------------------------------------------------------------------------
+
+static void TokenAdd     (frontend_t* frontend, token_t token);
+static void NameTableAdd (frontend_t* frontend, identifier_t* identifier);
+
+static void TokenArrayResize (token_array_t* tokens);
+static void NameTableResize  (name_table_t* identifiers);
+
+static void TokenArrayDestroy (token_array_t* tokens);
+static void NameTableDestroy  (name_table_t* identifiers);
 
 //--------------------------------------------------------------------------
 
@@ -26,193 +33,233 @@ void FrontendInit (frontend_t* frontend)
 {
     assert (frontend != NULL);
 
-    frontend->names_table = (identifier_t*) calloc (NAMES_TABLE_SIZE, sizeof (identifier_t));
-    CUSTOM_ASSERT (frontend->names_table != NULL);
+    frontend->tokens.token_array = (ast_node_t**) calloc (TOKEN_ARRAY_INITIAL_CAPACITY, sizeof (ast_node_t*));
+    CUSTOM_ASSERT (frontend->tokens.token_array != NULL);
 
-    frontend->names_table_size = NAMES_TABLE_SIZE;
-    frontend->n_names = 0;
+    frontend->tokens.size = 0;
+    frontend->tokens.capacity = TOKEN_ARRAY_INITIAL_CAPACITY;    
 
-    frontend->token_array = NULL;
+    frontend->identifiers.name_table = (identifier_t*) calloc (NAME_TABLE_INITIAL_CAPACITY, sizeof (identifier_t));
+    CUSTOM_ASSERT (frontend->identifiers.name_table != NULL);
+
+    frontend->identifiers.size = 0;
+    frontend->identifiers.capacity = NAME_TABLE_INITIAL_CAPACITY;
+}
+
+void FrontendDestroy (frontend_t* frontend)
+{
+    assert (frontend != NULL);
+
+    TokenArrayDestroy (&frontend->tokens);
+    NameTableDestroy  (&frontend->identifiers);
 }
 
 //--------------------------------------------------------------------------
 
-ast_node_t** Tokenization (char* buf, size_t buf_size, frontend_t* frontend)
+void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 {
-    assert (buf != NULL);
+    assert (buffer != NULL);
 
     size_t buf_shift = 0;
 
-    ast_node_t** token_array = (ast_node_t**) calloc (TOKEN_ARRAY_SIZE, sizeof (ast_node_t*));
-    CUSTOM_ASSERT (token_array != NULL);
-
-    size_t tkn_arr_size = TOKEN_ARRAY_SIZE;
-    size_t tkn_arr_shift = 0;
-
-    while (buf_shift < buf_size)
+    while (buf_shift < buffer_size)
     {
-        // считываем число
-        if (isdigit (buf[buf_shift]))
+        // Read constant
+        if (isdigit (buffer[buf_shift]))
         {
-            tree_data_t token_data = {.type = NUMBER};
-            size_t num_len = 0;
-            double readen_number = 0;
+            token_t token = {.type = CONSTANT};
+            double constant = 0;
+            size_t constant_length = 0;
 
-            sscanf (buf + buf_shift, "%lf%n", &readen_number, (int*) &num_len);
-            token_data.content.number = readen_number;
+            sscanf (buffer + buf_shift, "%lf%n", &constant, (int*) &constant_length);
+            token.content.constant = constant;
 
-            TOKEN_INIT (token_data);
+            TokenAdd (frontend, token);
 
-            buf_shift += num_len;
+            buf_shift += constant_length;
         }
 
-        // считываем слово
-        else if (isalpha (buf[buf_shift]))
+        // Read keyword (made up of letters) or identifier
+        else if (isalpha (buffer[buf_shift]))
         {
-            tree_data_t token_data = {};
+            token_t token = {};
             size_t name_len = 0;
-            sscanf (buf + buf_shift, "%*[a-zA-Z]%n", (int*) &name_len);
 
-            // если не нашлось такое зарезервированное имя, то заполняем токен именем
-            if (FindReservedDataByName (buf + buf_shift, name_len, &token_data) != 0)
+            sscanf (buffer + buf_shift, "%*[a-zA-Z]%n", (int*) &name_len);
+
+            keyword_t keyword = StringToKeyword (buffer + buf_shift, name_len);
+
+            if (keyword != UNKNOWN_KEYWORD)
             {
-                identifier_t name_struct = {.begin = buf + buf_shift, .len = name_len};
-                name_struct.index = FindNameIndex (frontend, &name_struct);
-                CUSTOM_WARNING (name_struct.index != -1, NULL);
-                token_data.type = NAME;
-                token_data.content.name = name_struct;
-            }
-
-            TOKEN_INIT (token_data);
-            buf_shift += name_len;
-        }
-
-        // пропускаем все после # (комментарий)
-        else if (buf[buf_shift] == '#')
-        {
-            char* end_of_line = strchr (buf + buf_shift, '\n');
-            if (end_of_line == NULL)
-                *(buf + buf_shift) = '\n';
-            else
-                buf_shift = (size_t) (end_of_line - buf);
-        }
-
-        // игнорируем мусорные символы
-        else if (isspace (buf[buf_shift]))
-        {
-            buf_shift += 1;
-        }
-
-        else
-        {
-            tree_data_t token_data = {};
-            // если нашлась комбинация из 2 байт
-            if (FindReservedDataByName (buf + buf_shift, 2, &token_data) == 0)
-            {
-                TOKEN_INIT (token_data);
-                buf_shift += 2;
-            }
-            // иначе считываем как 1 байт
-            else if (FindReservedDataByName (buf + buf_shift, 1, &token_data) == 0)
-            {
-                TOKEN_INIT (token_data);
-                buf_shift += 1;
+                token.type = KEYWORD;
+                token.content.keyword = keyword;
             }
 
             else 
             {
-                SyntaxError ("Unexpected character");
+                identifier_t identifier = {.begin = buffer + buf_shift, .length = name_len};
+                NameTableAdd (frontend, &identifier);
+
+                token.type = IDENTIFIER;
+                token.content.identifier = identifier;
+            }
+
+            TokenAdd (frontend, token);
+            buf_shift += name_len;
+        }
+
+        // Skip comments
+        else if (buffer[buf_shift] == '#')
+        {
+            char* end_of_line = strchr (buffer + buf_shift, '\n');
+            if (end_of_line == NULL)
+            {
+                *(buffer + buf_shift) = '\n';
+            }
+
+            else
+            {
+                buf_shift = (size_t) (end_of_line - buffer);
             }
         }
+
+        // Skip spaces
+        else if (isspace (buffer[buf_shift]))
+        {
+            buf_shift += 1;
+        }
+
+        // Read keyword (made up of special characters)
+        else
+        {
+            token_t token = {.type = KEYWORD};
+
+            // First try to match a 2-byte keyword combination
+            token.content.keyword = StringToKeyword (buffer + buf_shift, 2);
+
+            if (token.content.keyword != UNKNOWN_KEYWORD)
+            {
+                TokenAdd (frontend, token);
+                buf_shift += 2;
+                continue;
+            }
+
+            // If 2-byte match fails, try 1-byte keyword
+            token.content.keyword = StringToKeyword (buffer + buf_shift, 1);
+
+            if (token.content.keyword != UNKNOWN_KEYWORD)
+            {
+                TokenAdd (frontend, token);
+                buf_shift += 1;
+                continue;
+            }
+
+            // If no valid keyword is found, this is a syntax error
+            fprintf (stderr, "Syntax Error (unexpected character): %c", buffer[buf_shift]);
+            exit (EXIT_FAILURE);
+        }
     }
-
-    tree_data_t token_data = {.type = RESERVED, .content = {.reserved = END}};
-    TOKEN_INIT (token_data);
-
-    frontend->token_array = token_array;
-
-    return token_array;
 }
 
 //--------------------------------------------------------------------------
 
-int FindNameIndex (frontend_t* frontend, identifier_t* name)
+static void TokenAdd (frontend_t* frontend, token_t token)
 {
-    CUSTOM_ASSERT (name != NULL);
+    assert (frontend != NULL);
 
-    for (int i = 0; i < frontend->n_names; ++i)
+    ast_node_t** token_array = frontend->tokens.token_array;
+
+    if (frontend->tokens.size >= frontend->tokens.capacity)
     {
-        if (strncmp (frontend->names_table[i].begin, name->begin, frontend->names_table[i].len) == 0)
+        TokenArrayResize (&frontend->tokens);
+    }
+
+    token_array[frontend->tokens.size] = (ast_node_t*) calloc (1, sizeof (ast_node_t));
+    CUSTOM_ASSERT (token_array[frontend->tokens.size] != NULL);
+
+    token_array[frontend->tokens.size]->token.type      = token.type;
+    token_array[frontend->tokens.size++]->token.content = token.content;
+}
+
+//--------------------------------------------------------------------------
+
+static void NameTableAdd (frontend_t* frontend, identifier_t* identifier)
+{
+    assert (frontend != NULL);
+    assert (identifier != NULL);
+
+    identifier_t* name_table = frontend->identifiers.name_table;
+
+    if (frontend->identifiers.size >= frontend->identifiers.capacity)
+    {
+        NameTableResize (&frontend->identifiers);
+    }
+
+    for (int i = 0; i < frontend->identifiers.size; ++i)
+    {
+        if (!strncmp (name_table[i].begin, identifier->begin, name_table[i].length))
         {
-            name->index = i;
-            return i;
+            identifier->index = i;
         }
     }
 
-    if ((size_t) frontend->n_names >= frontend->names_table_size)
-    {
-        frontend->names_table = NamesArrayResize (frontend, &frontend->names_table_size);
-        CUSTOM_WARNING (frontend->names_table != NULL, -1);
-    }
-
-    name->index = frontend->n_names;
-    frontend->names_table[frontend->n_names] = *name;
-    frontend->n_names += 1;
-
-    return name->index;
+    identifier->index = frontend->identifiers.size;
+    name_table[frontend->identifiers.size++] = *identifier;
 }
 
 //--------------------------------------------------------------------------
 
-ast_node_t** TokenArrayResize (ast_node_t** token_array, size_t* token_arr_size)
+static void TokenArrayResize (token_array_t* tokens)
 {
-    CUSTOM_ASSERT (token_array  != NULL);
-    CUSTOM_ASSERT (token_arr_size != NULL);
+    assert (tokens != NULL);
 
-    const ast_node_t* POISON = NULL;
-    token_array = (ast_node_t**) MyRecalloc (token_array, *token_arr_size * 2, sizeof (ast_node_t*), *token_arr_size, &POISON);
-    CUSTOM_WARNING (token_array != NULL, NULL);
-    *token_arr_size *= 2;
+    tokens->token_array = (ast_node_t**) 
+        MyRecalloc (tokens->token_array, tokens->capacity * INCREASE_FACTOR, tokens->capacity, sizeof (ast_node_t*));
+        
+    CUSTOM_ASSERT (tokens->token_array != NULL);
 
-    return token_array;
+    tokens->capacity *= INCREASE_FACTOR;
 }
 
 //--------------------------------------------------------------------------
 
-identifier_t* NamesArrayResize (frontend_t* frontend, size_t* arr_size)
+static void NameTableResize (name_table_t* identifiers)
 {
-    CUSTOM_ASSERT (frontend != NULL);
-    CUSTOM_ASSERT (arr_size    != NULL);
+    assert (identifiers != NULL);
 
-    const identifier_t* POISON = NULL;
-    frontend->names_table = (identifier_t*) MyRecalloc (frontend->names_table, *arr_size * 2, sizeof (ast_node_t*), *arr_size, &POISON);
-    CUSTOM_WARNING (frontend->names_table != NULL, NULL);
-    *arr_size *= 2;
+    identifiers->name_table = (identifier_t*) 
+        MyRecalloc (identifiers->name_table, identifiers->capacity * INCREASE_FACTOR, identifiers->capacity, sizeof (ast_node_t*));
 
-    return frontend->names_table;
+    CUSTOM_ASSERT (identifiers->name_table != NULL);
+
+    identifiers->capacity *= INCREASE_FACTOR;
 }
 
 //--------------------------------------------------------------------------
 
-void TokenArrayDestroy (ast_node_t** token_array)
+static void TokenArrayDestroy (token_array_t* tokens)
 {   
-    int i = 0;
-    while ((token_array[i]->data.type != RESERVED) || (token_array[i]->data.content.reserved != END))
+    assert (tokens != NULL);
+
+    for (size_t i = 0; i < tokens->size; ++i)
     {
-        FREE (token_array[i]);
-        ++i;
+        FREE (tokens->token_array[i]);
     }
 
-    FREE (token_array[i]);
-    FREE (token_array);
+    tokens->size = 0;
+    tokens->capacity = 0;
+
+    FREE (tokens->token_array);
 }
 
-//--------------------------------------------------------------------------
-
-void SyntaxError (const char* message)
+static void NameTableDestroy (name_table_t* identifiers)
 {
-    printf ("Syntax error: %s\n", message);
-    exit (EXIT_FAILURE);
+    assert (identifiers != NULL);
+
+    FREE (identifiers->name_table);
+
+    identifiers->size = 0;
+    identifiers->capacity = 0;
 }
 
 //--------------------------------------------------------------------------

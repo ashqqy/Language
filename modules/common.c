@@ -35,35 +35,32 @@ size_t FindFileSize (FILE* file)
 
 //--------------------------------------------------------------------------
 
-void* MyCalloc (size_t n_elems, size_t size_elems, const void* poison)
+void* MyRecalloc (void* memory, size_t new_capacity, size_t prev_capacity, size_t elem_size)
+{
+    if (memory == NULL)
     {
-    void* mem_ptr = calloc (n_elems, size_elems);
-    for (size_t i = 0; i < n_elems; i++)
-        memcpy ((char*) mem_ptr + i * size_elems, poison, size_elems);
-    return mem_ptr;
+        return calloc (new_capacity, elem_size);
     }
 
-void* MyRecalloc (void* memory, size_t n_elements, size_t size_elements, size_t previous_n_elements, const void* poison)
+    if (prev_capacity > new_capacity)
     {
-    /// Если уменьшаем блок памяти, то удаленные ячейки обнуляем
-    if (previous_n_elements > n_elements)
-        memset ((char*) memory + n_elements * size_elements, 0, size_elements * (previous_n_elements - n_elements));
+        memset ((char*) memory + new_capacity * elem_size, 0, elem_size * (prev_capacity - new_capacity));
+    }
 
     void* save_memory = memory;
-    memory = realloc (memory, n_elements * size_elements);
-    /// Если память не удалось перевыделить, то освобождаем старый указатель и возвращаем 0
+    memory = realloc (memory, new_capacity * elem_size);
     if (memory == NULL)
-        {
-        free (save_memory); save_memory = NULL;
+    {
+        FREE (save_memory);
         return NULL;
-        }
+    }
 
-    /// Если увеличиваем блок памяти, то новые ячейки заполняем ядовитым значением
-    if (previous_n_elements < n_elements)
-        for (size_t i = 0; i < n_elements - previous_n_elements; i++)
-            memcpy(((char*) memory + (previous_n_elements + i) * size_elements), poison, size_elements);
+    if (prev_capacity < new_capacity)
+    {
+        memset((char*) memory + prev_capacity * elem_size, 0, elem_size * (new_capacity - prev_capacity));
+    }
 
     return memory;
-    }
+}
 
 //--------------------------------------------------------------------------

@@ -22,7 +22,7 @@ ast_node_t* NodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_n
     ast_node_t* node = (ast_node_t*) calloc (1, sizeof (ast_node_t));
     CUSTOM_ASSERT (node != NULL);
 
-    node->data  = data;
+    node->token  = data;
     node->left  = left_node;
     node->right = right_node;
 
@@ -64,25 +64,25 @@ void AstSerialize (FILE* output_file, ast_node_t* node)
     }
 
     fprintf (output_file, "( ");
-    fprintf (output_file, "%d ", node->data.token_type);
+    fprintf (output_file, "%d ", node->token.type);
 
-    switch (node->data.token_type)
+    switch (node->token.type)
     {
         case CONSTANT:
         {
-            fprintf (output_file, "%lg ", node->data.content.constant);
+            fprintf (output_file, "%lg ", node->token.content.constant);
             break;
         }
 
         case IDENTIFIER:
         {
-            fprintf (output_file, "%d ", node->data.content.identifier.index);
+            fprintf (output_file, "%d ", node->token.content.identifier.index);
             break;
         }
 
         case KEYWORD:
         {
-            fprintf (output_file, "%d ", node->data.content.keyword);
+            fprintf (output_file, "%d ", node->token.content.keyword);
             break;
         }
     }
@@ -124,10 +124,10 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
         int token_type_len = 0;
         sscanf (buffer + *shift, "%d%n", &token_type, &token_type_len);
 
-        node_data.token_type = (token_type_t) token_type;
+        node_data.type = (token_type_t) token_type;
         *shift += token_type_len + 1;
 
-        switch (node_data.token_type)
+        switch (node_data.type)
         {
             case KEYWORD:
             {
@@ -222,7 +222,7 @@ void TokenArrayGraphvizDump (FILE* dump_file, ast_node_t** token_array)
     fprintf (dump_file, "{\n");
     fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
 
-    for (int i = 0; !(token_array[i]->data.token_type == KEYWORD && token_array[i]->data.content.keyword == END); ++i)
+    for (int i = 0; !(token_array[i]->token.type == KEYWORD && token_array[i]->token.content.keyword == END); ++i)
     {
         AstNodesGraphvizDump(dump_file, token_array[i]);
     }
@@ -242,25 +242,25 @@ static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
     if (node == NULL)
         return;
 
-    switch (node->data.token_type)
+    switch (node->token.type)
     {
         case CONSTANT: 
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
-                    node, node, "CONSTANT", node->data.content.constant);
+                    node, node, "CONSTANT", node->token.content.constant);
             break;
         }
 
         case IDENTIFIER:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
-                    node, node, "IDENTIFIER", node->data.content.identifier.index);
+                    node, node, "IDENTIFIER", node->token.content.identifier.index);
             break;
         }
 
         case KEYWORD:
         {
-            const char* keyword_string = KeywordToString (node->data.content.keyword);
+            const char* keyword_string = KeywordToString (node->token.content.keyword);
 
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %s | { <l>left|<r>right } }\"];\n", 
                     node, node, "KEYWORD", keyword_string);

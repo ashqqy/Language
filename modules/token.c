@@ -10,7 +10,7 @@ keyword_t StringToKeyword (const char* string_begin, size_t string_len)
 {
     assert (string_begin != NULL);
 
-    keyword_t keyword = 0;
+    keyword_t keyword = UNKNOWN_KEYWORD;
 
     for (size_t i = 0; i < sizeof (keyword_mappings) / sizeof (keyword_mappings[0]); ++i)
     {

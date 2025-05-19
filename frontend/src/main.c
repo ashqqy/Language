@@ -27,11 +27,12 @@ int main (const int argc, const char* argv[])
     frontend_t frontend = {};
     FrontendInit (&frontend);
 
-    ast_node_t** token_array = Tokenization (source_code_buffer, source_code_buffer_size, &frontend);
-    CUSTOM_WARNING (token_array != NULL, TOKENIZATION_ERROR);
+    Tokenization (&frontend, source_code_buffer, source_code_buffer_size);
+
+    FREE (source_code_buffer);
 
     size_t shift = 0;
-    ast_node_t* ast_root_node = GetProgram (token_array, &shift);
+    ast_node_t* ast_root_node = GetProgram (&frontend.tokens, &shift);
 
     FILE* dump_file = fopen ("./dump/dump.dot", "w");
     CUSTOM_ASSERT (source_code_file != NULL);
@@ -43,10 +44,7 @@ int main (const int argc, const char* argv[])
     AstSerialize (ast_file, ast_root_node);
     fclose (ast_file);
 
-    FREE (frontend.names_table);
-    TokenArrayDestroy (frontend.token_array);
-
-    FREE (source_code_buffer);
+    FrontendDestroy (&frontend);
 }
 
 //----------------------------------------------------------------------------

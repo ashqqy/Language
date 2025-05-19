@@ -1,425 +1,582 @@
+#include <assert.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "parse.h"
 
-#include "tokenization.h"
 #include "ast.h"
 #include "token.h"
 #include "common.h"
 
-#define TKN_DATA_(section) token_array[*shift]->data.section
+//----------------------------------------------------------------------------
 
-#define GET_RESERVED_(reserved_token, node_name, return_null, expected)                 \
-    ast_node_t* node_name = NULL;                                                      \
-    if (TKN_DATA_ (type) == KEYWORD && TKN_DATA_ (content.reserved) == reserved_token) \
-    {                                                                                   \
-        node_name = token_array[*shift];                                                \
-        *shift += 1;                                                                    \
-    }                                                                                   \
-    else if (return_null)                                                               \
-    {                                                                                   \
-        return node_name;                                                               \
-    }                                                                                   \
-    else                                                                                \
-    {                                                                                   \
-        SyntaxError ("Expected " #expected);                                            \
-    }
+#define CURRENT_NODE  tokens->token_array[*shift]
+#define CURRENT_TOKEN tokens->token_array[*shift]->token
 
-ast_node_t* GetProgram (ast_node_t** token_array, size_t* shift)
+#define HANDLE_COMPARSION_KEYWORDS(HANDLER_MACRO)   \
+    HANDLER_MACRO (EQUAL)                           \
+    HANDLER_MACRO (NOT_EQUAL)                       \
+    HANDLER_MACRO (LESS_OR_EQUAL)                   \
+    HANDLER_MACRO (GREATER_OR_EQUAL)                \
+    HANDLER_MACRO (LESS)                            \
+    HANDLER_MACRO (GREATER)                         \
+
+//----------------------------------------------------------------------------
+
+static void SyntaxError (const char* format, ...)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* root_node = GetStatements (token_array, shift, END);
-
-    return root_node;
-}
-
-ast_node_t* GetStatement (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* if_node = GetIf (token_array, shift);
-    if (if_node != NULL)
-        return if_node;
-
-    ast_node_t* while_node = GetWhile (token_array, shift);
-    if (while_node != NULL)
-        return while_node;
-
-    ast_node_t* print_node = GetPrint (token_array, shift);
-    if (print_node != NULL)
-        return print_node;
-
-    ast_node_t* var_node = GetVarInit (token_array, shift);
-    return var_node;
-}
-
-ast_node_t* GetStatements (ast_node_t** token_array, size_t* shift, keyword_t end_token)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* root_node = GetStatement (token_array, shift);
-    ast_node_t* join_node = root_node;
-    while (TKN_DATA_ (type) != KEYWORD || TKN_DATA_ (content.reserved) != end_token)
-    {
-        ast_node_t* next_node = GetStatement (token_array, shift);
-        NodeLink (next_node, &join_node->right);
-        join_node = next_node;    
-    }
-
-    return root_node;
-}
-
-ast_node_t* GetPrint (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    GET_RESERVED_ (PRINT, print_node, 1, 'print');
-    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
-    ast_node_t* name_node = GetName (token_array, shift);
-    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
-    GET_RESERVED_ (SEMI, semi_node, 0, ';');
-
-    lbrack_node = NULL; rbrack_node = NULL;
-
-    NodeLink (name_node, &print_node->left);
-    NodeLink (print_node, &semi_node->left);
-
-    return semi_node;
-}
-
-ast_node_t* GetIf (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    GET_RESERVED_ (IF, if_node, 1, 'if');
-    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
-    ast_node_t* bool_node = GetBool (token_array, shift);
-    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
-    GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
-
-    ast_node_t* if_statement_node = GetStatements (token_array, shift, RCURBR);
-
-    GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
-
-    if (TKN_DATA_ (type) == KEYWORD && TKN_DATA_ (content.reserved) == ELSE)
-    {
-        GET_RESERVED_ (ELSE, else_node, 1, 'else');
-        GET_RESERVED_ (LCURBR, else_lcurbr_node, 0, '{');
-        ast_node_t* else_statement_node = GetStatements (token_array, shift, RCURBR);
-        GET_RESERVED_ (RCURBR, else_rcurbr_node, 0, '}');
-
-        NodeLink (bool_node, &if_node->left);
-        NodeLink (else_node, &if_node->right);
-        NodeLink (if_statement_node, &else_node->left);        
-        NodeLink (else_statement_node, &else_node->right);
-        NodeLink (if_node, &lbrack_node->left);
-        lbrack_node->data.content.reserved = SEMI;        
-        
-        // не используются
-        else_lcurbr_node = NULL; else_rcurbr_node = NULL;
-    }
-    else 
-    {
-        NodeLink (bool_node, &if_node->left);
-        NodeLink (if_statement_node, &if_node->right);
-        NodeLink (if_node, &lbrack_node->left);
-        lbrack_node->data.content.reserved = SEMI;
-    }
-
-    // не используются
-    rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
-
-    return lbrack_node;
-}
-
-ast_node_t* GetWhile (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    GET_RESERVED_ (WHILE, while_node, 1, 'while');
-    GET_RESERVED_ (LBRACK, lbrack_node, 0, '(');
-    ast_node_t* bool_node = GetBool (token_array, shift);
-    GET_RESERVED_ (RBRACK, rbrack_node, 0, ')');
-    GET_RESERVED_ (LCURBR, lcurbr_node, 0, '{');
-
-    ast_node_t* statement_node = GetStatements (token_array, shift, RCURBR);
-
-    GET_RESERVED_ (RCURBR, rcurbr_node, 0, '}');
-
-    // не используются
-    rbrack_node = NULL; lcurbr_node = NULL; rcurbr_node = NULL;
-
-    NodeLink (bool_node, &while_node->left);
-    NodeLink (statement_node, &while_node->right);
-    NodeLink (while_node, &lbrack_node->left);
-    lbrack_node->data.content.reserved = SEMI;
-
-    return lbrack_node;
-}
-
-ast_node_t* GetBool (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* left_node  = GetBoolP1 (token_array, shift);
-    ast_node_t* comp_node  = GetCompare (token_array, shift);
-    ast_node_t* right_node = GetBoolP1 (token_array, shift);
+    va_list args;
     
-    NodeLink (left_node, &comp_node->left);
-    NodeLink (right_node, &comp_node->right);
+    fprintf (stderr, "Syntax error: ");
+    
+    va_start (args, format);
+    vfprintf (stderr, format, args);
+    va_end (args);
+    
+    fprintf (stderr, "\n");
 
-    return comp_node;
+    exit (EXIT_FAILURE);
 }
 
-ast_node_t* GetBoolP1 (ast_node_t** token_array, size_t* shift)
+//----------------------------------------------------------------------------
+
+static ast_node_t* ParseOptionalKeyword (token_array_t* tokens, size_t* shift, keyword_t keyword)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+    ast_node_t* keyword_node = NULL;
 
-    ast_node_t* num_node = GetMath (token_array, shift);
-    if (num_node != NULL)
-        return num_node;     
-
-    ast_node_t* var_node = GetName (token_array, shift);
-    return var_node;
-}
-
-ast_node_t* GetCompare (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    if ((TKN_DATA_ (type) == KEYWORD) &&      
-        (TKN_DATA_ (content.reserved) == EQ  || TKN_DATA_ (content.reserved) == NEQ ||
-         TKN_DATA_ (content.reserved) == LTE || TKN_DATA_ (content.reserved) == GTE || 
-         TKN_DATA_ (content.reserved) == LT  || TKN_DATA_ (content.reserved) == GT))
+    if ((CURRENT_TOKEN.type == KEYWORD) && (CURRENT_TOKEN.content.keyword == keyword))
     {
-        ast_node_t* comp_node = token_array[*shift];
+        keyword_node = CURRENT_NODE;
         *shift += 1;
-        return comp_node;
     }
 
-    else
-    {
-        SyntaxError ("Expected compare operator");
-    }
+    return keyword_node;
 }
 
-ast_node_t* GetVarInit (ast_node_t** token_array, size_t* shift)
+static ast_node_t* ParseNecessaryKeyword (token_array_t* tokens, size_t* shift, keyword_t keyword)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+    ast_node_t* keyword_node = ParseOptionalKeyword (tokens, shift, keyword);
 
-    ast_node_t* type_node = GetType (token_array, shift);
+    if (keyword_node == NULL)
+    {
+        const char* keyword_string = KeywordToString (keyword);
+        SyntaxError ("%s \"%s\"", "expected", keyword_string);
+    }
+
+    return keyword_node;
+}
+//----------------------------------------------------------------------------
+//                               MAIN PARSERS                               //
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseProgram (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* root_node = NULL;
+    ast_node_t* last_node = NULL;
+
+    while (*shift < tokens->size)
+    {
+        ast_node_t* next_node = ParseTopLevel (tokens, shift);
+        if (next_node == NULL)
+        {
+            SyntaxError ("%s", "top level definition error");
+        }
+
+        if (root_node == NULL)
+        {
+            root_node = next_node;
+        }
+
+        else
+        {
+            NodeLink (next_node, &last_node->right);
+        }
+
+        last_node = next_node;
+    }
+
+    return root_node;
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseTopLevel (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* top_level_definition_node = ParseFunctionDefinition (tokens, shift);
+
+    if (top_level_definition_node == NULL)
+    {
+        top_level_definition_node = ParseAssignment (tokens, shift);
+    }
+
+    return top_level_definition_node;
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* type_node = ParseType (tokens, shift);
+    if (type_node == NULL)
+    {
+        return NULL;
+    }
+
+    ast_node_t* identifier_node = ParseIdentifier (tokens, shift);
+    if (identifier_node == NULL)
+    {
+        SyntaxError ("%d", "expected identifier");
+        return NULL;
+    }
+
+    ast_node_t* left_bracket_node  = ParseOptionalKeyword  (tokens, shift, LEFT_BRACKET);
+    if (left_bracket_node == NULL)
+    {
+        *shift -= 2;
+        return NULL;
+    }
+
+    ast_node_t* arguments_node     = ParseArguments         (tokens, shift);
+    ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+
+    ast_node_t* block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+    ast_node_t* statement_node     = ParseStatements        (tokens, shift);
+    ast_node_t* block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+
+    ast_node_t* root_node       = left_bracket_node;
+    ast_node_t* parameters_node = right_bracket_node;
+    root_node->token.content.keyword       = TERMINATOR;
+    parameters_node->token.content.keyword = TERMINATOR;
+
+    NodeLink (type_node,       &root_node->left);
+    NodeLink (parameters_node, &root_node->right);
+    NodeLink (arguments_node,  &parameters_node->left);
+    NodeLink (statement_node,  &parameters_node->right);
+
+    return root_node;
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseVariableAssignment (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* type_node       = ParseType              (tokens, shift);
+    ast_node_t* assignment_node = ParseAssignment        (tokens, shift);
+    ast_node_t* terminator_node = HandleNeccesaryKeyword (tokens, shift, TERMINATOR);
 
     if (type_node != NULL)
     {
-        ast_node_t* semi_node = GetAsg (token_array, shift);
-        NodeLink (semi_node->left, &type_node->left);
-        NodeLink (type_node, &semi_node->left);
-        return semi_node;
+        NodeLink (type_node, &terminator_node->left);
+        NodeLink (assignment_node, &type_node->left);
     }
 
     else
     {
-        ast_node_t* semi_node = GetAsg (token_array, shift);
-        return semi_node;
+        NodeLink (assignment_node, &terminator_node->left);
     }
+
+    return terminator_node;
 }
 
-ast_node_t* GetType (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+//----------------------------------------------------------------------------
 
-    if (TKN_DATA_ (type) == KEYWORD && (TKN_DATA_ (content.reserved) == INT || TKN_DATA_ (content.reserved) == DBL))
+ast_node_t* ParseStatements (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* root_node = ParseStatement (tokens, shift);
+    ast_node_t* last_node = root_node;
+
+    while (last_node != NULL)
     {
-        ast_node_t* type_node = token_array[*shift];
-        *shift += 1;
-        return type_node;
+        ast_node_t* next_node = ParseStatement (tokens, shift);
+        NodeLink (next_node, &last_node->right);
+        last_node = next_node;
+    }
+
+    return root_node;
+}
+
+ast_node_t* ParseStatement (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* if_node = ParseIf (tokens, shift);
+    if (if_node != NULL)
+        return if_node;
+
+    ast_node_t* while_node = ParseWhile (tokens, shift);
+    if (while_node != NULL)
+        return while_node;
+
+    ast_node_t* print_node = ParsePrint (tokens, shift);
+    if (print_node != NULL)
+        return print_node;
+
+    ast_node_t* var_node = GetVariable (tokens, shift);
+    return var_node;
+}
+
+//----------------------------------------------------------------------------
+//                            STATEMENT PARSERS                             //
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseIf (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* if_node = ParseOptionalKeyword (tokens, shift, IF);
+    if (if_node == NULL)
+        return NULL;
+
+    ast_node_t* if_left_bracket_node  = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+    ast_node_t* if_bool_node          = ParseBoolExpression   (tokens, shift);
+    ast_node_t* if_right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+
+    ast_node_t* if_block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+    ast_node_t* if_statement_node     = ParseStatements       (tokens, shift);
+    ast_node_t* if_block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+
+    ast_node_t* else_node             = ParseOptionalKeyword  (tokens, shift, ELSE);
+
+    if (else_node != NULL)
+    {
+        ast_node_t* else_block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+        ast_node_t* else_statement_node     = ParseStatements          (tokens, shift);
+        ast_node_t* else_block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+
+        NodeLink (if_bool_node, &if_node->left);
+        NodeLink (else_node, &if_node->right);
+        NodeLink (if_statement_node, &else_node->left);        
+        NodeLink (else_statement_node, &else_node->right);        
     }
 
     else 
-        return NULL;
-}
-
-ast_node_t* GetAsg (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* name_node = GetName (token_array, shift);
-
-    GET_RESERVED_ (ASG, asg_node, 0, '=');
-
-    ast_node_t* math_node  = GetMath (token_array, shift);
-
-    if (math_node == NULL)
-        SyntaxError ("Math assignment error");
-    GET_RESERVED_ (SEMI, semi_node, 0, ';');
-
-
-    NodeLink (asg_node, &semi_node->left);
-    NodeLink (name_node, &asg_node->left);
-    NodeLink (math_node, &asg_node->right);
-
-    return semi_node;
-}
-
-ast_node_t* GetName (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    if (TKN_DATA_ (type) == NAME)
     {
-        ast_node_t* name_node = token_array[*shift];
-        *shift += 1;
-        return name_node;
+        NodeLink (if_bool_node, &if_node->left);
+        NodeLink (if_statement_node, &if_node->right);
     }
-    else
-        SyntaxError ("Name Error");
+
+    // Workaround
+    ast_node_t* terminator_node = if_left_bracket_node;
+    terminator_node->token.content.keyword = TERMINATOR;
+    NodeLink (if_node, &terminator_node->left);
+
+    return terminator_node;
 }
 
-ast_node_t* GetNum (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+//----------------------------------------------------------------------------
 
-    if (TKN_DATA_ (type) == KEYWORD && TKN_DATA_ (content.reserved) == SUB)
+ast_node_t* ParseWhile (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* while_node = ParseOptionalKeyword (tokens, shift, WHILE);
+    if (while_node == NULL)
+        return NULL;
+
+    ast_node_t* left_bracket_node  = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+    ast_node_t* bool_node          = ParseBoolExpression                (tokens, shift);
+    ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+
+    ast_node_t* block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+    ast_node_t* statement_node     = ParseStatements          (tokens, shift);
+    ast_node_t* block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+
+    NodeLink (bool_node, &while_node->left);
+    NodeLink (statement_node, &while_node->right);
+
+    // Workaround
+    ast_node_t* terminator_node = left_bracket_node;
+    terminator_node->token.content.keyword = TERMINATOR;
+    NodeLink (while_node, &left_bracket_node->left);
+
+    return terminator_node;
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseFunctionCall (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    // TODO
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseReturn (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    // TODO
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParsePrint (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* print_node = ParseOptionalKeyword (tokens, shift, PRINT);
+    if (print_node == NULL)
+        return NULL;
+
+    ast_node_t* left_bracket_node   = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+    ast_node_t* expression_node     = ParseExpression       (tokens, shift);
+    ast_node_t* right_bracket_node  = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+    ast_node_t* terminator_node     = ParseNecessaryKeyword (tokens, shift, TERMINATOR);
+
+    NodeLink (expression_node, &print_node->left);
+    NodeLink (print_node, &terminator_node->left);
+
+    return terminator_node;
+}
+
+ast_node_t* ParseInput (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* input_node = ParseOptionalKeyword (tokens, shift, INPUT);
+    if (input_node == NULL)
+        return NULL;
+
+    ast_node_t* left_bracket_node   = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+    ast_node_t* identifier_node     = ParseIdentifier       (tokens, shift);
+    ast_node_t* right_bracket_node  = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+    ast_node_t* terminator_node     = ParseNecessaryKeyword (tokens, shift, TERMINATOR);
+
+    NodeLink (identifier_node, &input_node->left);
+    NodeLink (input_node, &terminator_node->left);
+
+    return terminator_node;
+}
+
+//----------------------------------------------------------------------------
+//                            EXPRESSION PARSERS                            //
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseBoolExpression (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* left_node    = ParseExpression      (tokens, shift);
+    ast_node_t* compare_node = ParseCompareOperator (tokens, shift);
+
+    if (compare_node != NULL)
     {
-        ast_node_t* sub_node = token_array[*shift];
-        *shift += 1;
-        if (TKN_DATA_ (type) == NUMBER)
-        {
-            ast_node_t* num_node = token_array[*shift];
-            *shift += 1;
-            NodeLink (num_node, &sub_node->left);
-            return sub_node;
-        }
+        ast_node_t* right_node = ParseExpression (tokens, shift);
         
-        else
-            SyntaxError ("Number error");
+        NodeLink (left_node,  &compare_node->left);
+        NodeLink (right_node, &compare_node->right);
+
+        return compare_node;
     }
 
-    else if (TKN_DATA_ (type) == NUMBER)
+    return left_node;
+}   
+
+//--------------------------------------------------------------------------
+
+ast_node_t* ParseExpression (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* left_node      = ParseTerm (tokens, shift);
+    ast_node_t* operation_node = ParseOptionalKeyword (tokens, shift, ADD) ?: 
+                                 ParseOptionalKeyword (tokens, shift, SUB);
+
+    if (operation_node != NULL)
     {
-        ast_node_t* num_node = token_array[*shift];
-        *shift += 1;
-        return num_node;
+        ast_node_t* right_node = ParseExpression (tokens, shift);
+        
+        NodeLink (left_node,  &operation_node->left);
+        NodeLink (right_node, &operation_node->right);
+
+        return operation_node;
+    }
+
+    return left_node;
+}
+
+ast_node_t* ParseTerm (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* left_node      = ParsePrimary         (tokens, shift);
+    ast_node_t* operation_node = ParseOptionalKeyword (tokens, shift, MUL) ?: 
+                                 ParseOptionalKeyword (tokens, shift, DIV);
+
+    if (operation_node != NULL)
+    {
+        ast_node_t* right_node = ParseTerm (tokens, shift);
+
+        NodeLink (left_node,  &operation_node->left);
+        NodeLink (right_node, &operation_node->right);
+        
+        return operation_node;
+    }
+
+    return left_node;
+}
+
+ast_node_t* ParsePrimary (token_array_t* tokens, size_t* const shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* left_bracket_node = ParseOptionalKeyword (tokens, shift, LEFT_BRACKET);
+
+    if (left_bracket_node != NULL)
+    {
+        ast_node_t* node = ParseExpression (tokens, shift);
+        ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+
+        return node;
+    }
+
+    else if (CURRENT_TOKEN.type == IDENTIFIER)
+    {
+        return ParseIdentifier (tokens, shift);
     }
 
     else
-        return NULL;
+    {
+        return ParseConstant (tokens, shift);
+    }
+}
+
+ast_node_t* ParseConstant (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* minus_node = ParseOptionalKeyword (tokens, shift, SUB);
+    ast_node_t* constant_node = NULL;
+
+    if (CURRENT_TOKEN.type == CONSTANT)
+    {
+        constant_node = CURRENT_NODE;
+        *shift += 1;
+    }
+    else
+    {
+        SyntaxError ("%s", "expected constant");
+    }
+
+    if (minus_node != NULL)
+    {
+        NodeLink (constant_node, &minus_node->left);
+        return minus_node;
+    }
+
+    return constant_node;
 }
 
 //--------------------------------------------------------------------------
 
-ast_node_t* GetMath (ast_node_t** token_array, size_t* shift)
+ast_node_t* ParseAssignment (token_array_t* tokens, size_t* shift)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+    assert (tokens != NULL);
+    assert (shift  != NULL);
 
-    ast_node_t* math_node = GetPlus (token_array, shift);
+    ast_node_t* variable_node   = ParseIdentifier        (tokens, shift);
+    ast_node_t* assignment_node = HandleNeccesaryKeyword (tokens, shift, ASSIGNMENT);
+    ast_node_t* expression_node = ParseExpression        (tokens, shift);
 
-    return math_node;
+    NodeLink (variable_node, &assignment_node->left);
+    NodeLink (expression_node, &assignment_node->right);
+
+    return assignment_node;
 }
 
-ast_node_t* GetPlus (ast_node_t** token_array, size_t* shift)
+ast_node_t* ParseCallArguments (token_array_t* tokens, size_t* shift)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+    assert (tokens != NULL);
+    assert (shift  != NULL);
 
-    ast_node_t* first_node = GetMult (token_array, shift);
-    if ((TKN_DATA_ (type) == KEYWORD) && (TKN_DATA_ (content.reserved) == ADD || TKN_DATA_ (content.reserved) == SUB))
-    {   
-        ast_node_t* parent_node = token_array[*shift];
-
-        *shift += 1;
-        ast_node_t* second_node = GetPlus (token_array, shift);
-        
-        NodeLink (first_node, &parent_node->left);
-        NodeLink (second_node, &parent_node->right);
-
-        first_node = parent_node;
-    }
-    return first_node;
+    // TODO
 }
 
-ast_node_t* GetMult (ast_node_t** token_array, size_t* shift)
+ast_node_t* ParseDefinitionArguments (token_array_t* tokens, size_t* shift)
 {
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
+    assert (tokens != NULL);
+    assert (shift  != NULL);
 
-    ast_node_t* first_node = GetDeg (token_array, shift);
+    // TODO
+}
 
-    if ((TKN_DATA_ (type) == KEYWORD) && 
-        (TKN_DATA_ (content.reserved) == MUL || TKN_DATA_ (content.reserved) == DIV))
+ast_node_t* ParseType (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    // TODO
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseCompareOperator (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* comparsion_node = NULL;
+
+    #define COMPARSION_HANDLER(comparsion_keyword)                                   \
+        comparsion_node = ParseOptionalKeyword (tokens, shift, comparsion_keyword);  \
+        if (comparsion_node != NULL)                                                 \
+        {                                                                            \
+            return comparsion_node;                                                  \
+        }
+    
+    HANDLE_COMPARSION_KEYWORDS (COMPARSION_HANDLER)
+
+    #undef COMPARSION_HANDLE
+
+    return NULL;
+}
+
+//----------------------------------------------------------------------------
+
+ast_node_t* ParseIdentifier (token_array_t* tokens, size_t* shift)
+{
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+
+    ast_node_t* identifier_node = NULL;
+
+    if (CURRENT_TOKEN.type == IDENTIFIER)
     {
-        ast_node_t* parent_node = token_array[*shift];
-
+        identifier_node = CURRENT_NODE;
         *shift += 1;
-        ast_node_t* second_node = GetMult (token_array, shift);
-
-        NodeLink (first_node,  &parent_node->left);
-        NodeLink (second_node, &parent_node->right);
-        
-        first_node = parent_node;
-    }
-    return first_node;
-}
-
-ast_node_t* GetDeg (ast_node_t** token_array, size_t* shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    ast_node_t* first_node = GetBracket (token_array, shift);
-
-    if ((TKN_DATA_ (type) == KEYWORD) && (TKN_DATA_ (content.reserved) == DEG))
-    {
-        ast_node_t* parent_node = token_array[*shift];
-
-        *shift += 1;
-        ast_node_t* second_node = GetDeg (token_array, shift);
-
-        NodeLink (first_node,  &parent_node->left);
-        NodeLink (second_node, &parent_node->right);
-
-        first_node = parent_node;
     }
 
-    return first_node;
-}
-
-ast_node_t* GetBracket (ast_node_t** token_array, size_t* const shift)
-{
-    CUSTOM_ASSERT (token_array != NULL);
-    CUSTOM_ASSERT (shift       != NULL);
-
-    if ((TKN_DATA_ (type) == KEYWORD) && 
-       (TKN_DATA_ (content.reserved) == LBRACK))
-    {
-        *shift += 1;
-        ast_node_t* node = GetPlus (token_array, shift);
-        if ((TKN_DATA_ (type) != KEYWORD) || 
-            (TKN_DATA_ (content.reserved) != RBRACK))
-            SyntaxError ("Expected close bracket");
-
-        *shift += 1;
-        return node;
-    }
-
-    else if (TKN_DATA_ (type) == NUMBER)
-        return GetNum (token_array, shift);
-    else
-        return GetName (token_array, shift);
+    return identifier_node;
 }
 
 //--------------------------------------------------------------------------

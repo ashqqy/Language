@@ -8,26 +8,26 @@
     
 //--------------------------------------------------------------------------
 
-typedef struct ast_node     ast_node_t;
-typedef struct tokens_array tokens_array_t;
+typedef struct ast_node    ast_node_t;
+typedef struct token_array token_array_t;
 
 struct ast_node
 {
-    token_t data;
+    token_t     token;
     ast_node_t* left;
     ast_node_t* right;
 };
 
-struct tokens_array
+struct token_array
 {
     ast_node_t** token_array;
-    size_t token_array_size;
-    size_t token_array_capacity;
+    size_t size;
+    size_t capacity;
 };
 
 //--------------------------------------------------------------------------
 
-ast_node_t* NodeCreate  (token_t data, ast_node_t* left_node, ast_node_t* right_node);
+ast_node_t* NodeCreate  (token_t token, ast_node_t* left_node, ast_node_t* right_node);
 void        NodeLink    (ast_node_t* node, ast_node_t** node_to_link_to);
 void        TreeDestroy (ast_node_t* node);
 

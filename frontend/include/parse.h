@@ -1,27 +1,45 @@
 #ifndef PARSE_H
 #define PARSE_H
 
-#include <ast.h>
+#include <stdlib.h>
 
-ast_node_t* GetProgram    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetStatement  (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetStatements (ast_node_t** token_array, size_t* shift, keyword_t end_token);
-ast_node_t* GetPrint      (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetIf         (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetWhile      (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetBool       (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetBoolP1     (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetCompare    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetVarInit    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetType       (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetAsg        (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetName       (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetNum        (ast_node_t** token_array, size_t* shift);
+#include "ast.h"
 
-ast_node_t* GetMath    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetPlus    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetMult    (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetDeg     (ast_node_t** token_array, size_t* shift);
-ast_node_t* GetBracket (ast_node_t** token_array, size_t* const shift);
+// Main parsers
+
+ast_node_t* ParseProgram             (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseTopLevel            (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseFunctionDefinition  (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseVariableAssignment  (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseStatements          (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseStatement           (token_array_t* tokens, size_t* shift);
+
+// Statement parsers
+
+ast_node_t* ParseIf                  (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseWhile               (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseFunctionCall        (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseReturn              (token_array_t* tokens, size_t* shift);
+ast_node_t* ParsePrint               (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseInput               (token_array_t* tokens, size_t* shift);
+
+// Expression parsers
+
+ast_node_t* ParseBoolExpression      (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseExpression          (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseTerm                (token_array_t* tokens, size_t* shift);
+ast_node_t* ParsePrimary             (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseConstant            (token_array_t* tokens, size_t* shift);
+
+// Support parsers
+
+ast_node_t* ParseAssignment          (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseCallArguments       (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseDefinitionArguments (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseType                (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseCompareOperator     (token_array_t* tokens, size_t* shift);
+ast_node_t* ParseIdentifier          (token_array_t* tokens, size_t* shift);
+
+void SyntaxError (const char* format, ...);
 
 #endif // PARSE_H
