@@ -1,0 +1,47 @@
+//----------------------------------------------------------------------------
+
+Main Rules
+    <PROGRAM>    ::= { <FUNCTION> }
+    <FUNCTION>   ::= <NAME> "(" <ARGUMENTS> ")" "{" { <STATEMENT> } "}"
+    <STATEMENT>  ::= <ASSIGNMENT> | <IF> | <WHILE> | <CALL> | <RETURN> 
+
+Structural analysis
+    <ASSIGNMENT> ::= [ "variable" ] <NAME> "=" <EXPRESSION> ";"
+    <IF>         ::= "if"    "(" <COMPARE> ")" "{" { <STATEMENT> } "}" [ "else" "{" { <STATEMENT> } "}" ]
+    <WHILE>      ::= "while" "(" <COMPARE> ")" "{" { <STATEMENT> } "}"
+    <CALL>       ::= <NAME>  "(" <ARGUMENTS> ")" ";"
+    <RETURN>     ::= "return" <EXPRESSION> ";"
+
+Expression analysis
+    <COMPARE>    ::= <EXPRESSION> [ ( "==" | "<" | ">" | "<=" | ">=" | "!=" ) <EXPRESSION> ]
+    <EXPRESSION> ::= <TERM>    { ( "+" | "-" ) <TERM>    }
+    <TERM>       ::= <PRIMARY> { ( "*" | "/" ) <PRIMARY> }
+    <PRIMARY>    ::= ( "(" <EXPRESSION> ")" | <NAME> | <CONSTANT> )
+
+Support rules
+    <CONSTANT>   ::= constant
+    <NAME>       ::= identifier
+    <ARGUMENTS>  ::= { <EXPRESSION> { "," <EXPRESSION> } }
+
+//----------------------------------------------------------------------------
+
+// TODO
+
+// 1. Bool
+// <BOOL_EXPRESSION> ::= <BOOL_AND> { "||" <BOOL_AND> }
+// <BOOL_AND>        ::= <BOOL_NOT> { "&&" <BOOL_NOT> }
+// <BOOL_NOT>        ::= "!" { <BOOL_COMPARE> }
+// <BOOL_COMPARE>    ::= <BOOL_PRIMARY> [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) <BOOL_PRIMARY> ]
+// <BOOL_PRIMARY>    :: = ( "(" <BOOL_EXPRESSION> ")" | <CONSTANT> | <NAME> )
+
+// 2. Detailed description
+// <Constant>   ::= [ "-" ] { <Digit> }+ ["." { <Digit> }+ ]
+// <Name>       ::= { <Letter> }
+
+// <Digit> ::= "0"-"9"
+// <Letter> ::= { ("A"-"Z" | "a"-"z" ) }
+// <Symbol> ::= ( "(" | ")" | ";" | "=" | "-" | "." )
+
+3. return, локальные переменные, 
+
+//----------------------------------------------------------------------------
