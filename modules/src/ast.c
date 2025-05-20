@@ -219,42 +219,77 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
 
 //------------------------------------------------------
 
-void AstGraphvizDump (FILE* dump_file, ast_node_t* root_node)
+void AstGraphvizDump (ast_node_t* root_node)
 {
-    assert (dump_file != NULL);
     assert (root_node != NULL);
 
-    fprintf (dump_file, "digraph G\n");
-    fprintf (dump_file, "{\n");
-    fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+    const char* dot_file_name = "./dump/ast.dot";
+    const char* png_file_name = "./dump/ast.png";
 
-    AstNodesGraphvizDump (dump_file, root_node);
-    fprintf (dump_file, "\n");
+    if (system("mkdir -p ./dump") != 0)
+    {
+        fprintf(stderr, "Failed to create dump directory\n");
+        return;
+    }
 
-    AstNodesGraphvizLink (dump_file, root_node);
-    fprintf (dump_file, "}\n");
+    FILE* dot_file = fopen (dot_file_name, "w");
+    CUSTOM_ASSERT (dot_file != NULL);
 
-    const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png";
-    system(command);
+    fprintf (dot_file, "digraph G\n");
+    fprintf (dot_file, "{\n");
+    fprintf (dot_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+
+    AstNodesGraphvizDump (dot_file, root_node);
+    fprintf (dot_file, "\n");
+
+    AstNodesGraphvizLink (dot_file, root_node);
+    fprintf (dot_file, "}\n");
+
+    fclose (dot_file);
+
+    char command[256] = {};
+    snprintf (command, sizeof (command), "dot %s -Tpng -o %s", dot_file_name, png_file_name);
+    
+    if (system(command) != 0)
+    {
+        fprintf(stderr, "Failed to generate PNG from DOT file\n");
+    }
 }
 
-void TokenArrayGraphvizDump (FILE* dump_file, token_array_t tokens)
+void TokenArrayGraphvizDump (token_array_t tokens)
 {
-    assert (dump_file != NULL);
+    const char* dot_file_name = "./dump/token_array.dot";
+    const char* png_file_name = "./dump/token_array.png";
+    
+    if (system("mkdir -p ./dump") != 0)
+    {
+        fprintf(stderr, "Failed to create dump directory\n");
+        return;
+    }
 
-    fprintf (dump_file, "digraph G\n");
-    fprintf (dump_file, "{\n");
-    fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
+    FILE* dot_file = fopen (dot_file_name, "w");
+    CUSTOM_ASSERT (dot_file != NULL);
+
+    fprintf (dot_file, "digraph G\n");
+    fprintf (dot_file, "{\n");
+    fprintf (dot_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
 
     for (size_t i = 0; i < tokens.size; ++i)
     {
-        AstNodesGraphvizDump (dump_file, tokens.token_array[i]);
+        AstNodesGraphvizDump (dot_file, tokens.token_array[i]);
     }
 
-    fprintf (dump_file, "}\n");
+    fprintf (dot_file, "}\n");
 
-    const char command[81] = "dot ./dump/dump.dot -Tpng -o ./dump/dump.png"; // linux
-    system (command);
+    fclose (dot_file);
+
+    char command[256] = {};
+    snprintf (command, sizeof (command), "dot %s -Tpng -o %s", dot_file_name, png_file_name);
+    
+    if (system(command) != 0)
+    {
+        fprintf(stderr, "Failed to generate PNG from DOT file\n");
+    }
 }
 
 //------------------------------------------------------
@@ -288,7 +323,7 @@ static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
         {
             const char* keyword_string = KeywordToString (node->token.content.keyword);
 
-            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %s | { <l>left|<r>right } }\"];\n", 
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> \\%s | { <l>left|<r>right } }\"];\n", 
                     node, node, TypeToString (node->token.type), keyword_string);
             break;
         }

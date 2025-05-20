@@ -5,6 +5,8 @@
 
 #include "ast.h"
 
+void SyntaxError (const char* format, ...);
+
 // Main parsers
 
 ast_node_t* ParseProgram             (token_array_t* tokens, size_t* shift);

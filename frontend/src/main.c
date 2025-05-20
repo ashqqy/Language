@@ -29,26 +29,16 @@ int main (const int argc, const char* argv[])
 
     Tokenization (&frontend, source_code_buffer, source_code_buffer_size);
 
-    // FILE* dump_file = fopen ("./dump/dump.dot", "w");
-    // CUSTOM_ASSERT (source_code_file != NULL);
-    // TokenArrayGraphvizDump (dump_file, frontend.tokens);
-    // fclose (dump_file);
+    // TokenArrayGraphvizDump (frontend.tokens);
 
     FREE (source_code_buffer);
 
     size_t shift = 0;
     ast_node_t* ast_root_node = ParseProgram (&frontend.tokens, &shift);
 
-    FILE* dump_file = fopen ("./dump/dump.dot", "w");
-    CUSTOM_ASSERT (source_code_file != NULL);
-    AstGraphvizDump (dump_file, ast_root_node);
-    fclose (dump_file);
+    // AstGraphvizDump (ast_root_node);
 
-    system ("mkdir ./tmp");
-    FILE* ast_file = fopen ("./tmp/serialized.ast", "w");
-    CUSTOM_ASSERT (ast_file != NULL);
-    AstSerialize (ast_file, ast_root_node);
-    fclose (ast_file);
+    AstSerialize (stdout, ast_root_node);
 
     FrontendDestroy (&frontend);
 }

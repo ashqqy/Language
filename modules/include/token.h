@@ -3,38 +3,25 @@
 
 #include <stdlib.h>
 
-typedef struct identifier         identifier_t;
-typedef struct name_table         name_table_t;
-
-typedef enum   keyword            keyword_t;
-
-typedef enum   token_type         token_type_t;
-typedef union  token_content      token_content_t;
-typedef struct token              token_t;
-
-typedef struct keyword_mapping    keyword_mapping_t;
-typedef struct token_type_mapping token_type_mapping_t;
-
-
 //--------------------------------------------------------------------------
 
-struct identifier
+typedef struct identifier
 {
     char*  begin;
     size_t length;
     int    index;
-};
+} identifier_t;
 
-struct name_table
+typedef struct name_table
 {
     identifier_t* name_table;
     size_t size;
     size_t capacity;
-};
+} name_table_t;
 
 //--------------------------------------------------------------------------
 
-enum keyword
+typedef enum keyword
 {
     UNKNOWN_KEYWORD     = 0,
 
@@ -70,11 +57,11 @@ enum keyword
     LESS_OR_EQUAL       = 74,
     GREATER_OR_EQUAL    = 75,
     NOT_EQUAL           = 76
-};
+} keyword_t;
 
 //--------------------------------------------------------------------------
 
-enum token_type
+typedef enum token_type
 {
     // Main types
     CONSTANT             = 1,
@@ -85,28 +72,28 @@ enum token_type
     PARAMETERS           = 5,
     VARIABLE_DECLARATION = 6,
     CALL                 = 7
-};
+} token_type_t;
 
-union token_content
+typedef union token_content
 {
     double       constant;
     identifier_t identifier; 
     keyword_t    keyword;
-};
+} token_content_t;
 
-struct token
+typedef struct token
 {
     token_type_t    type;
     token_content_t content;
-};
+} token_t;
 
 //--------------------------------------------------------------------------
 
-struct keyword_mapping
+typedef struct keyword_mapping
 {
     const char* string;
     keyword_t   keyword;
-};
+} keyword_mapping_t;
 
 static const keyword_mapping_t keyword_mappings[] = 
 {
@@ -146,11 +133,11 @@ static const keyword_mapping_t keyword_mappings[] =
 
 //--------------------------------------------------------------------------
 
-struct token_type_mapping
+typedef struct token_type_mapping
 {
     const char*  string;
     token_type_t type;
-};
+} token_type_mapping_t;
 
 #define TOKEN_TYPE_MAPPING(name) {.string = #name, .type = name}
 

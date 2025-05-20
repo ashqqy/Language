@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <string.h>
 
 #include "common.h"
@@ -6,8 +7,8 @@
 
 char* ReadFile (FILE* file, size_t* n_readen)
 {
-    if (file == NULL || n_readen == NULL)
-        return NULL;
+    assert (file != NULL);
+    assert (n_readen != NULL);
 
     size_t file_size = FindFileSize (file);
     if (file_size == 0)

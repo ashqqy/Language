@@ -34,8 +34,8 @@ void        TreeDestroy (ast_node_t* node);
 void        AstSerialize   (FILE* output_file, ast_node_t* node);
 ast_node_t* AstDeserialize (FILE* input_file);
 
-void AstGraphvizDump        (FILE* dump_file, ast_node_t* root_node);
-void TokenArrayGraphvizDump (FILE* dump_file, token_array_t tokens);
+void AstGraphvizDump        (ast_node_t* root_node);
+void TokenArrayGraphvizDump (token_array_t tokens);
 
 //--------------------------------------------------------------------------
 

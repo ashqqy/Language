@@ -24,11 +24,7 @@
 
 //----------------------------------------------------------------------------
 
-// extern void TokenAddExternal (token_array_t* tokens, token_t token);
-
-//----------------------------------------------------------------------------
-
-static void SyntaxError (const char* format, ...)
+void SyntaxError (const char* format, ...)
 {
     va_list args;
     

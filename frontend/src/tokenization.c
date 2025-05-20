@@ -18,13 +18,10 @@ static const size_t INCREASE_FACTOR = 2;
 
 //--------------------------------------------------------------------------
 
+extern void SyntaxError (const char* format, ...);
+
 static void TokenAdd     (token_array_t* tokens, token_t token);
 static void NameTableAdd (name_table_t* identifiers, identifier_t* identifier);
-
-void TokenAddExternal (token_array_t* tokens, token_t token)
-{
-    return TokenAdd (tokens, token);
-}
 
 static void TokenArrayResize (token_array_t* tokens);
 static void NameTableResize  (name_table_t* identifiers);
@@ -160,8 +157,7 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
             }
 
             // If no valid keyword is found, this is a syntax error
-            fprintf (stderr, "Syntax Error (unexpected character): %c", buffer[buf_shift]);
-            exit (EXIT_FAILURE);
+            SyntaxError ("%s \"%c\"", "unexpected character", buffer[buf_shift]);
         }
     }
 }
