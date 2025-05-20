@@ -40,6 +40,4 @@ ast_node_t* ParseType                (token_array_t* tokens, size_t* shift);
 ast_node_t* ParseCompareOperator     (token_array_t* tokens, size_t* shift);
 ast_node_t* ParseIdentifier          (token_array_t* tokens, size_t* shift);
 
-void SyntaxError (const char* format, ...);
-
 #endif // PARSE_H

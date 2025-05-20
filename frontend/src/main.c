@@ -29,10 +29,15 @@ int main (const int argc, const char* argv[])
 
     Tokenization (&frontend, source_code_buffer, source_code_buffer_size);
 
+    // FILE* dump_file = fopen ("./dump/dump.dot", "w");
+    // CUSTOM_ASSERT (source_code_file != NULL);
+    // TokenArrayGraphvizDump (dump_file, frontend.tokens);
+    // fclose (dump_file);
+
     FREE (source_code_buffer);
 
     size_t shift = 0;
-    ast_node_t* ast_root_node = GetProgram (&frontend.tokens, &shift);
+    ast_node_t* ast_root_node = ParseProgram (&frontend.tokens, &shift);
 
     FILE* dump_file = fopen ("./dump/dump.dot", "w");
     CUSTOM_ASSERT (source_code_file != NULL);

@@ -1,3 +1,7 @@
+# cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+# cmake --build build
+# ./build/Language ./Tests/Factorial.mylang
+
 cmake_minimum_required(VERSION 3.10)
 project(Language LANGUAGES C)
 

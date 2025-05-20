@@ -43,6 +43,10 @@ static void SyntaxError (const char* format, ...)
 
 static ast_node_t* ParseOptionalKeyword (token_array_t* tokens, size_t* shift, keyword_t keyword)
 {
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+    assert (*shift < tokens->size);
+
     ast_node_t* keyword_node = NULL;
 
     if ((CURRENT_TOKEN.type == KEYWORD) && (CURRENT_TOKEN.content.keyword == keyword))
@@ -56,6 +60,10 @@ static ast_node_t* ParseOptionalKeyword (token_array_t* tokens, size_t* shift, k
 
 static ast_node_t* ParseNecessaryKeyword (token_array_t* tokens, size_t* shift, keyword_t keyword)
 {
+    assert (tokens != NULL);
+    assert (shift  != NULL);
+    assert (*shift < tokens->size);
+
     ast_node_t* keyword_node = ParseOptionalKeyword (tokens, shift, keyword);
 
     if (keyword_node == NULL)
@@ -74,6 +82,7 @@ ast_node_t* ParseProgram (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* root_node = NULL;
     ast_node_t* last_node = NULL;
@@ -108,12 +117,13 @@ ast_node_t* ParseTopLevel (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* top_level_definition_node = ParseFunctionDefinition (tokens, shift);
 
     if (top_level_definition_node == NULL)
     {
-        top_level_definition_node = ParseAssignment (tokens, shift);
+        top_level_definition_node = ParseVariableAssignment (tokens, shift);
     }
 
     return top_level_definition_node;
@@ -125,6 +135,7 @@ ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* type_node = ParseType (tokens, shift);
     if (type_node == NULL)
@@ -135,7 +146,7 @@ ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
     ast_node_t* identifier_node = ParseIdentifier (tokens, shift);
     if (identifier_node == NULL)
     {
-        SyntaxError ("%d", "expected identifier");
+        SyntaxError ("%s", "expected identifier");
         return NULL;
     }
 
@@ -146,12 +157,12 @@ ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
         return NULL;
     }
 
-    ast_node_t* arguments_node     = ParseArguments         (tokens, shift);
-    ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+    ast_node_t* arguments_node     = ParseDefinitionArguments (tokens, shift);
+    ast_node_t* right_bracket_node = ParseNecessaryKeyword    (tokens, shift, RIGHT_BRACKET);
 
-    ast_node_t* block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
-    ast_node_t* statement_node     = ParseStatements        (tokens, shift);
-    ast_node_t* block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+    ast_node_t* block_open_node    = ParseNecessaryKeyword    (tokens, shift, BLOCK_OPEN);
+    ast_node_t* statement_node     = ParseStatements          (tokens, shift);
+    ast_node_t* block_close_node   = ParseNecessaryKeyword    (tokens, shift, BLOCK_CLOSE);
 
     ast_node_t* root_node       = left_bracket_node;
     ast_node_t* parameters_node = right_bracket_node;
@@ -172,10 +183,19 @@ ast_node_t* ParseVariableAssignment (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
-    ast_node_t* type_node       = ParseType              (tokens, shift);
-    ast_node_t* assignment_node = ParseAssignment        (tokens, shift);
-    ast_node_t* terminator_node = HandleNeccesaryKeyword (tokens, shift, TERMINATOR);
+    ast_node_t* type_node       = ParseType       (tokens, shift);
+    ast_node_t* assignment_node = ParseAssignment (tokens, shift);
+    if (assignment_node == NULL)
+    {
+        if (type_node != NULL)
+            *shift -= 1;
+
+        return NULL;
+    }
+
+    ast_node_t* terminator_node = ParseNecessaryKeyword  (tokens, shift, TERMINATOR);
 
     if (type_node != NULL)
     {
@@ -197,6 +217,7 @@ ast_node_t* ParseStatements (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* root_node = ParseStatement (tokens, shift);
     ast_node_t* last_node = root_node;
@@ -215,6 +236,7 @@ ast_node_t* ParseStatement (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* if_node = ParseIf (tokens, shift);
     if (if_node != NULL)
@@ -228,7 +250,7 @@ ast_node_t* ParseStatement (token_array_t* tokens, size_t* shift)
     if (print_node != NULL)
         return print_node;
 
-    ast_node_t* var_node = GetVariable (tokens, shift);
+    ast_node_t* var_node = ParseVariableAssignment (tokens, shift);
     return var_node;
 }
 
@@ -240,6 +262,7 @@ ast_node_t* ParseIf (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* if_node = ParseOptionalKeyword (tokens, shift, IF);
     if (if_node == NULL)
@@ -258,7 +281,7 @@ ast_node_t* ParseIf (token_array_t* tokens, size_t* shift)
     if (else_node != NULL)
     {
         ast_node_t* else_block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
-        ast_node_t* else_statement_node     = ParseStatements          (tokens, shift);
+        ast_node_t* else_statement_node     = ParseStatements       (tokens, shift);
         ast_node_t* else_block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
         NodeLink (if_bool_node, &if_node->left);
@@ -287,18 +310,19 @@ ast_node_t* ParseWhile (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* while_node = ParseOptionalKeyword (tokens, shift, WHILE);
     if (while_node == NULL)
         return NULL;
 
     ast_node_t* left_bracket_node  = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
-    ast_node_t* bool_node          = ParseBoolExpression                (tokens, shift);
+    ast_node_t* bool_node          = ParseBoolExpression   (tokens, shift);
     ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
 
     ast_node_t* block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
-    ast_node_t* statement_node     = ParseStatements          (tokens, shift);
-    ast_node_t* block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+    ast_node_t* statement_node     = ParseStatements       (tokens, shift);
+    ast_node_t* block_close_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
     NodeLink (bool_node, &while_node->left);
     NodeLink (statement_node, &while_node->right);
@@ -317,7 +341,9 @@ ast_node_t* ParseFunctionCall (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
+    return NULL;
     // TODO
 }
 
@@ -327,7 +353,9 @@ ast_node_t* ParseReturn (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
+    return NULL;
     // TODO
 }
 
@@ -337,6 +365,7 @@ ast_node_t* ParsePrint (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* print_node = ParseOptionalKeyword (tokens, shift, PRINT);
     if (print_node == NULL)
@@ -357,6 +386,7 @@ ast_node_t* ParseInput (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* input_node = ParseOptionalKeyword (tokens, shift, INPUT);
     if (input_node == NULL)
@@ -381,6 +411,7 @@ ast_node_t* ParseBoolExpression (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* left_node    = ParseExpression      (tokens, shift);
     ast_node_t* compare_node = ParseCompareOperator (tokens, shift);
@@ -404,6 +435,7 @@ ast_node_t* ParseExpression (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* left_node      = ParseTerm (tokens, shift);
     ast_node_t* operation_node = ParseOptionalKeyword (tokens, shift, ADD) ?: 
@@ -426,6 +458,7 @@ ast_node_t* ParseTerm (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* left_node      = ParsePrimary         (tokens, shift);
     ast_node_t* operation_node = ParseOptionalKeyword (tokens, shift, MUL) ?: 
@@ -448,6 +481,7 @@ ast_node_t* ParsePrimary (token_array_t* tokens, size_t* const shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* left_bracket_node = ParseOptionalKeyword (tokens, shift, LEFT_BRACKET);
 
@@ -474,6 +508,7 @@ ast_node_t* ParseConstant (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* minus_node = ParseOptionalKeyword (tokens, shift, SUB);
     ast_node_t* constant_node = NULL;
@@ -503,10 +538,22 @@ ast_node_t* ParseAssignment (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
-    ast_node_t* variable_node   = ParseIdentifier        (tokens, shift);
-    ast_node_t* assignment_node = HandleNeccesaryKeyword (tokens, shift, ASSIGNMENT);
-    ast_node_t* expression_node = ParseExpression        (tokens, shift);
+    ast_node_t* variable_node   = ParseIdentifier (tokens, shift);
+    if (variable_node == NULL)
+    {
+        return NULL;
+    }
+
+    ast_node_t* assignment_node = ParseOptionalKeyword (tokens, shift, ASSIGNMENT);
+    if (assignment_node == NULL)
+    {
+        *shift -= 1;
+        return NULL;
+    }
+
+    ast_node_t* expression_node = ParseExpression (tokens, shift);
 
     NodeLink (variable_node, &assignment_node->left);
     NodeLink (expression_node, &assignment_node->right);
@@ -518,7 +565,9 @@ ast_node_t* ParseCallArguments (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
+    return NULL;
     // TODO
 }
 
@@ -526,7 +575,9 @@ ast_node_t* ParseDefinitionArguments (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
+    return NULL;
     // TODO
 }
 
@@ -535,7 +586,12 @@ ast_node_t* ParseType (token_array_t* tokens, size_t* shift)
     assert (tokens != NULL);
     assert (shift  != NULL);
 
-    // TODO
+    ast_node_t* void_node   = ParseOptionalKeyword (tokens, shift, VOID);
+    if (void_node != NULL)
+        return void_node;
+
+    ast_node_t* double_node = ParseOptionalKeyword (tokens, shift, DOUBLE);
+    return double_node;
 }
 
 //----------------------------------------------------------------------------
@@ -544,6 +600,7 @@ ast_node_t* ParseCompareOperator (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* comparsion_node = NULL;
 
@@ -567,6 +624,7 @@ ast_node_t* ParseIdentifier (token_array_t* tokens, size_t* shift)
 {
     assert (tokens != NULL);
     assert (shift  != NULL);
+    assert (*shift < tokens->size);
 
     ast_node_t* identifier_node = NULL;
 

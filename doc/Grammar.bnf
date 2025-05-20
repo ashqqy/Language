@@ -9,12 +9,12 @@ Main Rules
     <STATEMENT>           ::= ( <VARIABLE_ASSIGNMENT> | <IF> | <WHILE> | <FUNCTION_CALL> | <RETURN> | <PRINT> | <INPUT>)
 
 Statement rules
-    <IF>            ::= "if"    "(" <BOOL> ")" "{" { <STATEMENT> } "}" [ "else" "{" { <STATEMENT> } "}" ]
-    <WHILE>         ::= "while" "(" <BOOL> ")" "{" { <STATEMENT> } "}"
+    <IF>            ::= "if"    "(" <BOOL> ")" "{" <STATEMENTS> "}" [ "else" "{" { <STATEMENT> } "}" ]
+    <WHILE>         ::= "while" "(" <BOOL> ")" "{" <STATEMENTS> "}"
     <FUNCTION_CALL> ::= <IDENTIFIER>  "(" <CALL_ARGUMENTS> ")" ";"
     <RETURN>        ::= "return" <EXPRESSION> ";"
-    <PRINT>         ::= "print" "(" <EXPRESSION> ")"
-    <INPUT>         ::= "input" "(" <IDENTIFIER> ")"
+    <PRINT>         ::= "print" "(" <EXPRESSION> ")" ";"
+    <INPUT>         ::= "input" "(" <IDENTIFIER> ")" ";"
 
 Expression rules
     <BOOL_EXPRESSION> ::= <EXPRESSION> [ <COMPARE_OPERATOR> <EXPRESSION> ]

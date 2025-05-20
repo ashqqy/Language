@@ -32,7 +32,6 @@ ast_node_t* NodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_n
 
 void NodeLink (ast_node_t* node, ast_node_t** node_to_link_to)
 {
-    assert (node != NULL);
     assert (node_to_link_to != NULL);
 
     *node_to_link_to = node;
@@ -214,17 +213,17 @@ void AstGraphvizDump (FILE* dump_file, ast_node_t* root_node)
     system(command);
 }
 
-void TokenArrayGraphvizDump (FILE* dump_file, ast_node_t** token_array)
+void TokenArrayGraphvizDump (FILE* dump_file, token_array_t tokens)
 {
-    assert (token_array != NULL);
+    assert (dump_file != NULL);
 
     fprintf (dump_file, "digraph G\n");
     fprintf (dump_file, "{\n");
     fprintf (dump_file, "node[shape=\"record\", style=\"rounded, filled\"];\n\n");
 
-    for (int i = 0; !(token_array[i]->token.type == KEYWORD && token_array[i]->token.content.keyword == END); ++i)
+    for (size_t i = 0; i < tokens.size; ++i)
     {
-        AstNodesGraphvizDump(dump_file, token_array[i]);
+        AstNodesGraphvizDump (dump_file, tokens.token_array[i]);
     }
 
     fprintf (dump_file, "}\n");

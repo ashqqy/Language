@@ -200,6 +200,7 @@ static void NameTableAdd (frontend_t* frontend, identifier_t* identifier)
         if (!strncmp (name_table[i].begin, identifier->begin, name_table[i].length))
         {
             identifier->index = i;
+            return;
         }
     }
 
