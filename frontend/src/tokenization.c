@@ -18,8 +18,13 @@ static const size_t INCREASE_FACTOR = 2;
 
 //--------------------------------------------------------------------------
 
-static void TokenAdd     (frontend_t* frontend, token_t token);
-static void NameTableAdd (frontend_t* frontend, identifier_t* identifier);
+static void TokenAdd     (token_array_t* tokens, token_t token);
+static void NameTableAdd (name_table_t* identifiers, identifier_t* identifier);
+
+void TokenAddExternal (token_array_t* tokens, token_t token)
+{
+    return TokenAdd (tokens, token);
+}
 
 static void TokenArrayResize (token_array_t* tokens);
 static void NameTableResize  (name_table_t* identifiers);
@@ -74,7 +79,7 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
             sscanf (buffer + buf_shift, "%lf%n", &constant, (int*) &constant_length);
             token.content.constant = constant;
 
-            TokenAdd (frontend, token);
+            TokenAdd (&frontend->tokens, token);
 
             buf_shift += constant_length;
         }
@@ -98,13 +103,13 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
             else 
             {
                 identifier_t identifier = {.begin = buffer + buf_shift, .length = name_len};
-                NameTableAdd (frontend, &identifier);
+                NameTableAdd (&frontend->identifiers, &identifier);
 
                 token.type = IDENTIFIER;
                 token.content.identifier = identifier;
             }
 
-            TokenAdd (frontend, token);
+            TokenAdd (&frontend->tokens, token);
             buf_shift += name_len;
         }
 
@@ -139,7 +144,7 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 
             if (token.content.keyword != UNKNOWN_KEYWORD)
             {
-                TokenAdd (frontend, token);
+                TokenAdd (&frontend->tokens, token);
                 buf_shift += 2;
                 continue;
             }
@@ -149,7 +154,7 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 
             if (token.content.keyword != UNKNOWN_KEYWORD)
             {
-                TokenAdd (frontend, token);
+                TokenAdd (&frontend->tokens, token);
                 buf_shift += 1;
                 continue;
             }
@@ -163,39 +168,39 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 
 //--------------------------------------------------------------------------
 
-static void TokenAdd (frontend_t* frontend, token_t token)
+static void TokenAdd (token_array_t* tokens, token_t token)
 {
-    assert (frontend != NULL);
+    assert (tokens != NULL);
 
-    ast_node_t** token_array = frontend->tokens.token_array;
+    ast_node_t** token_array = tokens->token_array;
 
-    if (frontend->tokens.size >= frontend->tokens.capacity)
+    if (tokens->size >= tokens->capacity)
     {
-        TokenArrayResize (&frontend->tokens);
+        TokenArrayResize (tokens);
     }
 
-    token_array[frontend->tokens.size] = (ast_node_t*) calloc (1, sizeof (ast_node_t));
-    CUSTOM_ASSERT (token_array[frontend->tokens.size] != NULL);
+    token_array[tokens->size] = (ast_node_t*) calloc (1, sizeof (ast_node_t));
+    CUSTOM_ASSERT (token_array[tokens->size] != NULL);
 
-    token_array[frontend->tokens.size]->token.type      = token.type;
-    token_array[frontend->tokens.size++]->token.content = token.content;
+    token_array[tokens->size]->token.type      = token.type;
+    token_array[tokens->size++]->token.content = token.content;
 }
 
 //--------------------------------------------------------------------------
 
-static void NameTableAdd (frontend_t* frontend, identifier_t* identifier)
+static void NameTableAdd (name_table_t* identifiers, identifier_t* identifier)
 {
-    assert (frontend != NULL);
+    assert (identifiers != NULL);
     assert (identifier != NULL);
 
-    identifier_t* name_table = frontend->identifiers.name_table;
+    identifier_t* name_table = identifiers->name_table;
 
-    if (frontend->identifiers.size >= frontend->identifiers.capacity)
+    if (identifiers->size >= identifiers->capacity)
     {
-        NameTableResize (&frontend->identifiers);
+        NameTableResize (identifiers);
     }
 
-    for (int i = 0; i < frontend->identifiers.size; ++i)
+    for (int i = 0; i < identifiers->size; ++i)
     {
         if (!strncmp (name_table[i].begin, identifier->begin, name_table[i].length))
         {
@@ -204,8 +209,8 @@ static void NameTableAdd (frontend_t* frontend, identifier_t* identifier)
         }
     }
 
-    identifier->index = frontend->identifiers.size;
-    name_table[frontend->identifiers.size++] = *identifier;
+    identifier->index = identifiers->size;
+    name_table[identifiers->size++] = *identifier;
 }
 
 //--------------------------------------------------------------------------

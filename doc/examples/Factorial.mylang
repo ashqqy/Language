@@ -1,8 +1,8 @@
 #---------------------------------------------------------------
 
-double main ()
+void main ()
 {
-    double x = 5;
+    int x = 5;
     double fact = 1;
     
     while (x != 1)

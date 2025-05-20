@@ -24,6 +24,10 @@
 
 //----------------------------------------------------------------------------
 
+// extern void TokenAddExternal (token_array_t* tokens, token_t token);
+
+//----------------------------------------------------------------------------
+
 static void SyntaxError (const char* format, ...)
 {
     va_list args;
@@ -164,17 +168,23 @@ ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
     ast_node_t* statement_node     = ParseStatements          (tokens, shift);
     ast_node_t* block_close_node   = ParseNecessaryKeyword    (tokens, shift, BLOCK_CLOSE);
 
-    ast_node_t* root_node       = left_bracket_node;
-    ast_node_t* parameters_node = right_bracket_node;
-    root_node->token.content.keyword       = TERMINATOR;
-    parameters_node->token.content.keyword = TERMINATOR;
+    ast_node_t* terminator_node            = left_bracket_node;
+    terminator_node->token.content.keyword = TERMINATOR;
 
-    NodeLink (type_node,       &root_node->left);
-    NodeLink (parameters_node, &root_node->right);
-    NodeLink (arguments_node,  &parameters_node->left);
-    NodeLink (statement_node,  &parameters_node->right);
+    ast_node_t* function_definition_node               = right_bracket_node;
+    function_definition_node->token.type               = FUNCTION_DEFINITION;
+    function_definition_node->token.content.identifier = identifier_node->token.content.identifier;
 
-    return root_node;
+    ast_node_t* parameters_node          = block_open_node;
+    parameters_node->token.type          = PARAMETERS;
+
+    NodeLink (function_definition_node, &terminator_node->left);
+    NodeLink (type_node,                &function_definition_node->left);
+    NodeLink (parameters_node,          &function_definition_node->right);
+    NodeLink (arguments_node,           &parameters_node->left);
+    NodeLink (statement_node,           &parameters_node->right);
+
+    return terminator_node;
 }
 
 //----------------------------------------------------------------------------
@@ -590,8 +600,12 @@ ast_node_t* ParseType (token_array_t* tokens, size_t* shift)
     if (void_node != NULL)
         return void_node;
 
+    ast_node_t* int_node = ParseOptionalKeyword (tokens, shift, INT);
+    if (int_node != NULL)
+        return int_node;
+
     ast_node_t* double_node = ParseOptionalKeyword (tokens, shift, DOUBLE);
-    return double_node;
+        return double_node;
 }
 
 //----------------------------------------------------------------------------

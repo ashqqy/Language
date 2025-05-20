@@ -10,6 +10,10 @@
 
 //------------------------------------------------------
 
+#define ENUM_TO_STRING(enum) #enum
+
+//------------------------------------------------------
+
 static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node);
 static void AstNodesGraphvizLink (FILE* dump_file, ast_node_t* node);
 
@@ -84,6 +88,19 @@ void AstSerialize (FILE* output_file, ast_node_t* node)
             fprintf (output_file, "%d ", node->token.content.keyword);
             break;
         }
+
+        case FUNCTION_DEFINITION:
+        case VARIABLE_DECLARATION:
+        {
+            fprintf (output_file, "%d ", node->token.content.identifier);
+            break;
+        }
+
+        case PARAMETERS:
+        case CALL:
+        {
+            break;
+        }
     }
 
     AstSerialize (output_file, node->left);
@@ -141,6 +158,8 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
             }
 
             case IDENTIFIER:
+            case FUNCTION_DEFINITION:
+            case VARIABLE_DECLARATION:
             {
                 int identifier_index = -1;
                 int identifier_len = 0;
@@ -161,6 +180,12 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
                 node_data.content.constant = constant;
                 *shift += constant_len + 1;
 
+                break;
+            }
+
+            case PARAMETERS:
+            case CALL:
+            {
                 break;
             }
         }
@@ -246,14 +271,16 @@ static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
         case CONSTANT: 
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %lg | { <l>left|<r>right } }\"];\n", 
-                    node, node, "CONSTANT", node->token.content.constant);
+                    node, node, TypeToString (node->token.type), node->token.content.constant);
             break;
         }
 
         case IDENTIFIER:
+        case FUNCTION_DEFINITION:
+        case VARIABLE_DECLARATION:
         {
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %d | { <l>left|<r>right } }\"];\n", 
-                    node, node, "IDENTIFIER", node->token.content.identifier.index);
+                    node, node, TypeToString (node->token.type), node->token.content.identifier.index);
             break;
         }
 
@@ -262,7 +289,15 @@ static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
             const char* keyword_string = KeywordToString (node->token.content.keyword);
 
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | <data> %s | { <l>left|<r>right } }\"];\n", 
-                    node, node, "KEYWORD", keyword_string);
+                    node, node, TypeToString (node->token.type), keyword_string);
+            break;
+        }
+
+        case PARAMETERS:
+        case CALL:
+        {
+            fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | { <l>left|<r>right } }\"];\n", 
+                    node, node, TypeToString (node->token.type));
             break;
         }
     }

@@ -3,24 +3,18 @@
 
 #include <stdlib.h>
 
-typedef struct token           token_t;
-typedef enum   token_type      token_type_t;
-typedef union  token_content   token_content_t;
+typedef struct identifier         identifier_t;
+typedef struct name_table         name_table_t;
 
-typedef struct identifier      identifier_t;
-typedef struct name_table      name_table_t;
+typedef enum   keyword            keyword_t;
 
-typedef enum   keyword         keyword_t;
-typedef struct keyword_mapping keyword_mapping_t;
+typedef enum   token_type         token_type_t;
+typedef union  token_content      token_content_t;
+typedef struct token              token_t;
 
-//--------------------------------------------------------------------------
+typedef struct keyword_mapping    keyword_mapping_t;
+typedef struct token_type_mapping token_type_mapping_t;
 
-enum token_type
-{
-    CONSTANT   = 1,
-    IDENTIFIER = 2,
-    KEYWORD    = 3
-};
 
 //--------------------------------------------------------------------------
 
@@ -51,7 +45,8 @@ enum keyword
     RETURN              = 15,
 
     VOID                = 21,
-    DOUBLE              = 22,
+    INT                 = 22,
+    DOUBLE              = 23,
 
     INPUT               = 31,
     PRINT               = 32,
@@ -78,6 +73,19 @@ enum keyword
 };
 
 //--------------------------------------------------------------------------
+
+enum token_type
+{
+    // Main types
+    CONSTANT             = 1,
+    IDENTIFIER           = 2,
+    KEYWORD              = 3,
+    // Dummy types
+    FUNCTION_DEFINITION  = 4,
+    PARAMETERS           = 5,
+    VARIABLE_DECLARATION = 6,
+    CALL                 = 7
+};
 
 union token_content
 {
@@ -109,6 +117,7 @@ static const keyword_mapping_t keyword_mappings[] =
     {.string = "return",      .keyword = RETURN},
 
     {.string = "void",        .keyword = VOID},
+    {.string = "int",         .keyword = INT},
     {.string = "double",      .keyword = DOUBLE},
 
     {.string = "input",       .keyword = INPUT},
@@ -137,7 +146,32 @@ static const keyword_mapping_t keyword_mappings[] =
 
 //--------------------------------------------------------------------------
 
+struct token_type_mapping
+{
+    const char*  string;
+    token_type_t type;
+};
+
+#define TOKEN_TYPE_MAPPING(name) {.string = #name, .type = name}
+
+static const token_type_mapping_t token_type_mappings[] = 
+{
+    TOKEN_TYPE_MAPPING (CONSTANT),
+    TOKEN_TYPE_MAPPING (IDENTIFIER),
+    TOKEN_TYPE_MAPPING (KEYWORD),
+    TOKEN_TYPE_MAPPING (FUNCTION_DEFINITION),
+    TOKEN_TYPE_MAPPING (PARAMETERS),
+    TOKEN_TYPE_MAPPING (VARIABLE_DECLARATION),
+    TOKEN_TYPE_MAPPING (CALL),
+};
+
+#undef TOKEN_TYPE_MAPPING
+
+//--------------------------------------------------------------------------
+
 keyword_t   StringToKeyword (const char* string_begin, size_t string_len);
 const char* KeywordToString (keyword_t keyword);
+
+const char* TypeToString    (token_type_t type);
 
 #endif // TOKEN_H

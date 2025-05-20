@@ -40,3 +40,18 @@ const char* KeywordToString (keyword_t keyword)
 }
 
 //--------------------------------------------------------------------------
+
+const char* TypeToString (token_type_t type)
+{
+    for (size_t i = 0; i < sizeof (token_type_mappings) / sizeof (token_type_mappings[0]); ++i)
+    {
+        if (type == token_type_mappings[i].type)
+        {
+            return token_type_mappings[i].string;
+        }
+    }
+
+    return NULL;
+}
+
+//--------------------------------------------------------------------------

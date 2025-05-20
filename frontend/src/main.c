@@ -44,7 +44,8 @@ int main (const int argc, const char* argv[])
     AstGraphvizDump (dump_file, ast_root_node);
     fclose (dump_file);
 
-    FILE* ast_file = fopen ("./dump/serialized.ast", "w");
+    system ("mkdir ./tmp");
+    FILE* ast_file = fopen ("./tmp/serialized.ast", "w");
     CUSTOM_ASSERT (ast_file != NULL);
     AstSerialize (ast_file, ast_root_node);
     fclose (ast_file);
