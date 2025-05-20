@@ -5,10 +5,25 @@
 
 //--------------------------------------------------------------------------
 
-char* ReadFile (FILE* file, size_t* n_readen)
+char* ReadFile (const char* file_name, size_t* buffer_size)
+{
+    assert (file_name != NULL);
+    assert (buffer_size != NULL);
+
+    FILE* file = fopen (file_name, "r");
+    CUSTOM_ASSERT (file != NULL);
+
+    char* buffer = ReadOpenedFile (file, buffer_size);
+
+    fclose (file);
+
+    return buffer;
+}
+
+char* ReadOpenedFile (FILE* file, size_t* buffer_size)
 {
     assert (file != NULL);
-    assert (n_readen != NULL);
+    assert (buffer_size != NULL);
 
     size_t file_size = FindFileSize (file);
     if (file_size == 0)
@@ -18,15 +33,18 @@ char* ReadFile (FILE* file, size_t* n_readen)
     if (buffer == NULL)
         return NULL;
 
-    *n_readen = fread (buffer, sizeof (char), file_size, file);
-    if (*n_readen != file_size)
+    *buffer_size = fread (buffer, sizeof (char), file_size, file);
+    if (*buffer_size != file_size)
         return NULL;
+
 
     return buffer;
 }
 
 size_t FindFileSize (FILE* file)
 {
+    assert (file != NULL);
+
     fseek (file, 0L, SEEK_END);
     size_t size_file = (size_t) ftell (file);
     fseek (file, 0L, SEEK_SET);

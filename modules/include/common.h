@@ -41,7 +41,8 @@ while (0)
 
 //--------------------------------------------------------------------------
 
-char*  ReadFile     (FILE* file, size_t* n_readen);
+char* ReadFile (const char* file_name, size_t* buffer_size);
+char* ReadOpenedFile (FILE* file, size_t* buffer_size);
 size_t FindFileSize (FILE* file);
 
 void* MyRecalloc (void* memory, size_t new_capacity, size_t prev_capacity, size_t elem_size);

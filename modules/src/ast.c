@@ -92,7 +92,7 @@ void AstSerialize (FILE* output_file, ast_node_t* node)
         case FUNCTION_DEFINITION:
         case VARIABLE_DECLARATION:
         {
-            fprintf (output_file, "%d ", node->token.content.identifier);
+            fprintf (output_file, "%d ", node->token.content.identifier.index);
             break;
         }
 
@@ -100,6 +100,12 @@ void AstSerialize (FILE* output_file, ast_node_t* node)
         case CALL:
         {
             break;
+        }
+
+        default:
+        {
+            fprintf (stderr, "Switch case expected\n");
+            exit (EXIT_FAILURE);
         }
     }
 
@@ -114,7 +120,7 @@ ast_node_t* AstDeserialize (FILE* input_file)
     assert (input_file != NULL);
 
     size_t buffer_size = 0;
-    char* buffer = ReadFile (input_file, &buffer_size);
+    char* buffer = ReadOpenedFile (input_file, &buffer_size);
     CUSTOM_WARNING (buffer != NULL, NULL);
 
     int shift = 0;
@@ -188,6 +194,12 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
             {
                 break;
             }
+
+            default:
+            {
+                fprintf (stderr, "Switch case expected\n");
+                exit (EXIT_FAILURE);
+            }
         }
 
         ast_node_t* left_node  = DeserializeNodes (buffer, shift);
@@ -226,11 +238,7 @@ void AstGraphvizDump (ast_node_t* root_node)
     const char* dot_file_name = "./dump/ast.dot";
     const char* png_file_name = "./dump/ast.png";
 
-    if (system("mkdir -p ./dump") != 0)
-    {
-        fprintf(stderr, "Failed to create dump directory\n");
-        return;
-    }
+    system("mkdir -p ./dump");
 
     FILE* dot_file = fopen (dot_file_name, "w");
     CUSTOM_ASSERT (dot_file != NULL);
@@ -261,11 +269,7 @@ void TokenArrayGraphvizDump (token_array_t tokens)
     const char* dot_file_name = "./dump/token_array.dot";
     const char* png_file_name = "./dump/token_array.png";
     
-    if (system("mkdir -p ./dump") != 0)
-    {
-        fprintf(stderr, "Failed to create dump directory\n");
-        return;
-    }
+    system("mkdir -p ./dump");
 
     FILE* dot_file = fopen (dot_file_name, "w");
     CUSTOM_ASSERT (dot_file != NULL);
@@ -334,6 +338,12 @@ static void AstNodesGraphvizDump (FILE* dump_file, ast_node_t* node)
             fprintf (dump_file, "p%p[label = \"{ <ptr> %p | <type> %s | { <l>left|<r>right } }\"];\n", 
                     node, node, TypeToString (node->token.type));
             break;
+        }
+
+        default:
+        {
+            fprintf (stderr, "Switch case expected\n");
+            exit (EXIT_FAILURE);
         }
     }
     

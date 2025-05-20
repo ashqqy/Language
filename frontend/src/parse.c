@@ -160,9 +160,9 @@ ast_node_t* ParseFunctionDefinition (token_array_t* tokens, size_t* shift)
     ast_node_t* arguments_node     = ParseDefinitionArguments (tokens, shift);
     ast_node_t* right_bracket_node = ParseNecessaryKeyword    (tokens, shift, RIGHT_BRACKET);
 
-    ast_node_t* block_open_node    = ParseNecessaryKeyword    (tokens, shift, BLOCK_OPEN);
-    ast_node_t* statement_node     = ParseStatements          (tokens, shift);
-    ast_node_t* block_close_node   = ParseNecessaryKeyword    (tokens, shift, BLOCK_CLOSE);
+    ast_node_t* block_open_node = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+    ast_node_t* statement_node  = ParseStatements       (tokens, shift);
+                                  ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
     ast_node_t* terminator_node            = left_bracket_node;
     terminator_node->token.content.keyword = TERMINATOR;
@@ -276,19 +276,19 @@ ast_node_t* ParseIf (token_array_t* tokens, size_t* shift)
 
     ast_node_t* if_left_bracket_node  = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
     ast_node_t* if_bool_node          = ParseBoolExpression   (tokens, shift);
-    ast_node_t* if_right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+                                        ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
 
-    ast_node_t* if_block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+                                        ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
     ast_node_t* if_statement_node     = ParseStatements       (tokens, shift);
-    ast_node_t* if_block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+                                        ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
     ast_node_t* else_node             = ParseOptionalKeyword  (tokens, shift, ELSE);
 
     if (else_node != NULL)
     {
-        ast_node_t* else_block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
-        ast_node_t* else_statement_node     = ParseStatements       (tokens, shift);
-        ast_node_t* else_block_clode_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+                                          ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+        ast_node_t* else_statement_node = ParseStatements       (tokens, shift);
+                                          ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
         NodeLink (if_bool_node, &if_node->left);
         NodeLink (else_node, &if_node->right);
@@ -322,13 +322,13 @@ ast_node_t* ParseWhile (token_array_t* tokens, size_t* shift)
     if (while_node == NULL)
         return NULL;
 
-    ast_node_t* left_bracket_node  = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
-    ast_node_t* bool_node          = ParseBoolExpression   (tokens, shift);
-    ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+    ast_node_t* left_bracket_node = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+    ast_node_t* bool_node         = ParseBoolExpression   (tokens, shift);
+                                    ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
 
-    ast_node_t* block_open_node    = ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
-    ast_node_t* statement_node     = ParseStatements       (tokens, shift);
-    ast_node_t* block_close_node   = ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
+                                    ParseNecessaryKeyword (tokens, shift, BLOCK_OPEN);
+    ast_node_t* statement_node    = ParseStatements       (tokens, shift);
+                                    ParseNecessaryKeyword (tokens, shift, BLOCK_CLOSE);
 
     NodeLink (bool_node, &while_node->left);
     NodeLink (statement_node, &while_node->right);
@@ -377,9 +377,9 @@ ast_node_t* ParsePrint (token_array_t* tokens, size_t* shift)
     if (print_node == NULL)
         return NULL;
 
-    ast_node_t* left_bracket_node   = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+                                      ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
     ast_node_t* expression_node     = ParseExpression       (tokens, shift);
-    ast_node_t* right_bracket_node  = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+                                      ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
     ast_node_t* terminator_node     = ParseNecessaryKeyword (tokens, shift, TERMINATOR);
 
     NodeLink (expression_node, &print_node->left);
@@ -398,9 +398,9 @@ ast_node_t* ParseInput (token_array_t* tokens, size_t* shift)
     if (input_node == NULL)
         return NULL;
 
-    ast_node_t* left_bracket_node   = ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
+                                      ParseNecessaryKeyword (tokens, shift, LEFT_BRACKET);
     ast_node_t* identifier_node     = ParseIdentifier       (tokens, shift);
-    ast_node_t* right_bracket_node  = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+                                      ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
     ast_node_t* terminator_node     = ParseNecessaryKeyword (tokens, shift, TERMINATOR);
 
     NodeLink (identifier_node, &input_node->left);
@@ -493,8 +493,8 @@ ast_node_t* ParsePrimary (token_array_t* tokens, size_t* const shift)
 
     if (left_bracket_node != NULL)
     {
-        ast_node_t* node = ParseExpression (tokens, shift);
-        ast_node_t* right_bracket_node = ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
+        ast_node_t* node = ParseExpression       (tokens, shift);
+                           ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
 
         return node;
     }

@@ -196,16 +196,16 @@ static void NameTableAdd (name_table_t* identifiers, identifier_t* identifier)
         NameTableResize (identifiers);
     }
 
-    for (int i = 0; i < identifiers->size; ++i)
+    for (size_t i = 0; i < identifiers->size; ++i)
     {
         if (!strncmp (name_table[i].begin, identifier->begin, name_table[i].length))
         {
-            identifier->index = i;
+            identifier->index = (int) i;
             return;
         }
     }
 
-    identifier->index = identifiers->size;
+    identifier->index = (int) identifiers->size;
     name_table[identifiers->size++] = *identifier;
 }
 
