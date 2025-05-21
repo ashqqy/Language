@@ -39,7 +39,7 @@ typedef enum keyword
     PRINT               = 32,
 
     TERMINATOR          = 41,
-    SEPARATOR           = 42,
+    ARGUMENTS_SEPARATOR = 42,
 
     LEFT_BRACKET        = 51,
     RIGHT_BRACKET       = 52,
@@ -111,7 +111,7 @@ static const keyword_mapping_t keyword_mappings[] =
     {.string = "print",       .keyword = PRINT},
 
     {.string = ";",           .keyword = TERMINATOR},
-    {.string = ",",           .keyword = SEPARATOR},
+    {.string = ",",           .keyword = ARGUMENTS_SEPARATOR},
 
     {.string = "(",           .keyword = LEFT_BRACKET},
     {.string = ")",           .keyword = RIGHT_BRACKET},

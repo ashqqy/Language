@@ -27,12 +27,12 @@ struct token_array
 
 //--------------------------------------------------------------------------
 
-ast_node_t* NodeCreate  (token_t token, ast_node_t* left_node, ast_node_t* right_node);
-void        NodeLink    (ast_node_t* node, ast_node_t** node_to_link_to);
-void        TreeDestroy (ast_node_t* node);
+ast_node_t* AstNodeCreate (token_t token, ast_node_t* left_node, ast_node_t* right_node);
+void        AstNodeLink   (ast_node_t* node, ast_node_t** node_to_link_to);
+void        AstDestroy    (ast_node_t* node);
 
 void        AstSerialize   (FILE* output_file, ast_node_t* node);
-ast_node_t* AstDeserialize (FILE* input_file);
+ast_node_t* AstDeserialize (const char* file_name);
 
 void AstGraphvizDump        (ast_node_t* root_node);
 void TokenArrayGraphvizDump (token_array_t tokens);

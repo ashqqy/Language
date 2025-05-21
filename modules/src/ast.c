@@ -21,7 +21,7 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift);
 
 //------------------------------------------------------
 
-ast_node_t* NodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_node)
+ast_node_t* AstNodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_node)
 {
     ast_node_t* node = (ast_node_t*) calloc (1, sizeof (ast_node_t));
     CUSTOM_ASSERT (node != NULL);
@@ -34,7 +34,7 @@ ast_node_t* NodeCreate (token_t data, ast_node_t* left_node, ast_node_t* right_n
 }
 //------------------------------------------------------
 
-void NodeLink (ast_node_t* node, ast_node_t** node_to_link_to)
+void AstNodeLink (ast_node_t* node, ast_node_t** node_to_link_to)
 {
     assert (node_to_link_to != NULL);
 
@@ -43,13 +43,13 @@ void NodeLink (ast_node_t* node, ast_node_t** node_to_link_to)
 
 //------------------------------------------------------
 
-void TreeDestroy (ast_node_t* node)
+void AstDestroy (ast_node_t* node)
 {
     if (node == NULL)
         return;
 
-    TreeDestroy (node->left);
-    TreeDestroy (node->right);
+    AstDestroy (node->left);
+    AstDestroy (node->right);
 
     FREE (node);
 }
@@ -115,16 +115,17 @@ void AstSerialize (FILE* output_file, ast_node_t* node)
     fprintf (output_file, ") ");
 }
 
-ast_node_t* AstDeserialize (FILE* input_file)
+ast_node_t* AstDeserialize (const char* file_name)
 {
-    assert (input_file != NULL);
+    assert (file_name != NULL);
 
     size_t buffer_size = 0;
-    char* buffer = ReadOpenedFile (input_file, &buffer_size);
-    CUSTOM_WARNING (buffer != NULL, NULL);
+    char* buffer = ReadFile (file_name, &buffer_size);
+    CUSTOM_ASSERT (buffer != NULL && "AST reading error");
 
     int shift = 0;
     ast_node_t* root_node = DeserializeNodes (buffer, &shift);
+    CUSTOM_ASSERT (root_node != NULL && "AST deserializing error");
 
     FREE (buffer);
 
@@ -197,8 +198,7 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
 
             default:
             {
-                fprintf (stderr, "Switch case expected\n");
-                exit (EXIT_FAILURE);
+                assert ("Switch case expected\n" && 0);
             }
         }
 
@@ -208,12 +208,12 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
         if (buffer[*shift] == ')')
         {
             *shift += 2;
-            return NodeCreate (node_data, left_node, right_node);
+            return AstNodeCreate (node_data, left_node, right_node);
         }
 
         else
         {
-            CUSTOM_ASSERT ("Deserializing error: Expected close bracket" && 0);
+            CUSTOM_WARNING ("AST deserializing error: Expected close bracket" && 0, NULL);
         }
     }
 
@@ -225,7 +225,7 @@ static ast_node_t* DeserializeNodes (char* buffer, int* shift)
 
     else
     {
-        CUSTOM_ASSERT ("Deserializing error: Expected node" && 0);
+        CUSTOM_WARNING ("AST deserializing error: Expected node" && 0, NULL);
     }
 }
 

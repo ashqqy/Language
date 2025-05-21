@@ -76,13 +76,6 @@ $(OBJ): $(BUILD_DIR)/%.o: %.c
 
 #--------------------------------------------------------------------
 
-.PHONY: run
-run:
-	$(FRONTEND_EXECUTABLE_BINARY)
-	$(BACKEND_EXECUTABLE_BINARY)
-
-#--------------------------------------------------------------------
-
 .PHONY: clean
 clean:
 	rm -rf $(BUILD_DIR)

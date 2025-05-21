@@ -11,7 +11,8 @@ char* ReadFile (const char* file_name, size_t* buffer_size)
     assert (buffer_size != NULL);
 
     FILE* file = fopen (file_name, "r");
-    CUSTOM_ASSERT (file != NULL);
+    if (file == NULL)
+        return NULL;
 
     char* buffer = ReadOpenedFile (file, buffer_size);
 

@@ -174,12 +174,8 @@ static void TokenAdd (token_array_t* tokens, token_t token)
     {
         TokenArrayResize (tokens);
     }
-
-    token_array[tokens->size] = (ast_node_t*) calloc (1, sizeof (ast_node_t));
-    CUSTOM_ASSERT (token_array[tokens->size] != NULL);
-
-    token_array[tokens->size]->token.type      = token.type;
-    token_array[tokens->size++]->token.content = token.content;
+    
+    token_array[tokens->size++] = AstNodeCreate (token, NULL, NULL);
 }
 
 //--------------------------------------------------------------------------

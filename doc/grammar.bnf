@@ -6,12 +6,12 @@ Main Rules
     <FUNCTION_DEFINITION> ::= <TYPE> <IDENTIFIER> "(" <DEFINITION_ARGUMENTS> ")" "{" <STATEMENTS> "}"
     <VARIABLE_ASSIGNMENT> ::= [ <TYPE> ] <ASSIGNMENT> ";"
     <STATEMENTS>          ::= { <STATEMENT> }
-    <STATEMENT>           ::= ( <VARIABLE_ASSIGNMENT> | <IF> | <WHILE> | <FUNCTION_CALL> | <RETURN> | <PRINT> | <INPUT>)
+    <STATEMENT>           ::= ( <VARIABLE_ASSIGNMENT> | <IF> | <WHILE> | <CALL> | <RETURN> | <PRINT> | <INPUT> )
 
 Statement rules
     <IF>            ::= "if"    "(" <BOOL> ")" "{" <STATEMENTS> "}" [ "else" "{" { <STATEMENT> } "}" ]
     <WHILE>         ::= "while" "(" <BOOL> ")" "{" <STATEMENTS> "}"
-    <FUNCTION_CALL> ::= <IDENTIFIER>  "(" <CALL_ARGUMENTS> ")" ";"
+    <CALL>          ::= <IDENTIFIER>  "(" <CALL_ARGUMENTS> ")" ";"
     <RETURN>        ::= "return" <EXPRESSION> ";"
     <PRINT>         ::= "print" "(" <EXPRESSION> ")" ";"
     <INPUT>         ::= "input" "(" <IDENTIFIER> ")" ";"
@@ -21,13 +21,13 @@ Expression rules
 
     <EXPRESSION> ::= <TERM>    [ ( "+" | "-" ) <EXPRESSION> ]
     <TERM>       ::= <PRIMARY> [ ( "*" | "/" ) <TERM> ]
-    <PRIMARY>    ::= ( "(" <EXPRESSION> ")" | <IDENTIFIER> | <CONSTANT> )
+    <PRIMARY>    ::= ( "(" <EXPRESSION> ")" | <CALL> | <IDENTIFIER> | <CONSTANT> )
     <CONSTANT>   ::= constant
 
 Support rules
     <ASSIGNMENT>           ::= <IDENTIFIER> "=" <EXPRESSION>
-    <CALL_ARGUMENTS>       ::= { <EXPRESSION> { "," <EXPRESSION> } }
-    <DEFINITION_ARGUMENTS> ::= { <TYPE> <IDENTIFIER> { "," <TYPE> <IDENTIFIER> } }
+    <CALL_ARGUMENTS>       ::= [ <EXPRESSION> [ "," <CALL_ARGUMENTS> ] ]
+    <DEFINITION_ARGUMENTS> ::= [ <TYPE> <IDENTIFIER> [ "," <DEFINITION_ARGUMENTS> ] ]
     <TYPE>                 ::= ( "void" | "double" )
     <COMPARE_OPERATOR>     ::= ( "==" | "<" | ">" | "<=" | ">=" | "!=" )
     <IDENTIFIER>           ::= identifier
@@ -41,7 +41,7 @@ Support rules
 // <BOOL_AND>        ::= <BOOL_NOT> { "&&" <BOOL_NOT> }
 // <BOOL_NOT>        ::= "!" { <BOOL_COMPARE> }
 // <BOOL_COMPARE>    ::= <BOOL_PRIMARY> [ ( "==" | "!=" | "<" | ">" | "<=" | ">=" ) <BOOL_PRIMARY> ]
-// <BOOL_PRIMARY>    :: = ( "(" <BOOL_EXPRESSION> ")" | <CONSTANT> | <IDENTIFIER> )
+// <BOOL_PRIMARY>    :: = ( "(" <BOOL_EXPRESSION> ")" | <CALL> | <IDENTIFIER> | <CONSTANT>)
 
 // 2. Detailed description
 // <Constant>   ::= [ "-" ] { <Digit> }+ ["." { <Digit> }+ ]
