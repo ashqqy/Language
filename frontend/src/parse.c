@@ -376,11 +376,10 @@ ast_node_t* ParseFunctionCall (token_array_t* tokens, size_t* shift)
     ast_node_t* arguments_node     = ParseCallArguments    (tokens, shift);
                                      ParseNecessaryKeyword (tokens, shift, RIGHT_BRACKET);
 
-    ast_node_t* call_node = left_bracket_node;
+    ast_node_t* call_node = func_identifier_node;
     call_node->token.type = CALL;
 
-    AstNodeLink (func_identifier_node, &call_node->left);
-    AstNodeLink (arguments_node, &call_node->right);
+    AstNodeLink (arguments_node, &call_node->left);
 
     return call_node;
 }

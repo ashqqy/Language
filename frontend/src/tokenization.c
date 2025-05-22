@@ -62,34 +62,34 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 {
     assert (buffer != NULL);
 
-    size_t buf_shift = 0;
+    size_t buffer_shift = 0;
 
-    while (buf_shift < buffer_size)
+    while (buffer_shift < buffer_size)
     {
         // Read constant
-        if (isdigit (buffer[buf_shift]))
+        if (isdigit (buffer[buffer_shift]))
         {
             token_t token = {.type = CONSTANT};
-            double constant = 0;
+            int constant = 0;
             size_t constant_length = 0;
 
-            sscanf (buffer + buf_shift, "%lf%n", &constant, (int*) &constant_length);
+            sscanf (buffer + buffer_shift, "%d%n", &constant, (int*) &constant_length);
             token.content.constant = constant;
 
             TokenAdd (&frontend->tokens, token);
 
-            buf_shift += constant_length;
+            buffer_shift += constant_length;
         }
 
         // Read keyword (made up of letters) or identifier
-        else if (isalpha (buffer[buf_shift]))
+        else if (isalpha (buffer[buffer_shift]))
         {
             token_t token = {};
             size_t name_len = 0;
 
-            sscanf (buffer + buf_shift, "%*[a-zA-Z]%n", (int*) &name_len);
+            sscanf (buffer + buffer_shift, "%*[a-zA-Z]%n", (int*) &name_len);
 
-            keyword_t keyword = StringToKeyword (buffer + buf_shift, name_len);
+            keyword_t keyword = StringToKeyword (buffer + buffer_shift, name_len);
 
             if (keyword != UNKNOWN_KEYWORD)
             {
@@ -99,7 +99,7 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
 
             else 
             {
-                identifier_t identifier = {.begin = buffer + buf_shift, .length = name_len};
+                identifier_t identifier = {.begin = buffer + buffer_shift, .length = name_len};
                 NameTableAdd (&frontend->identifiers, &identifier);
 
                 token.type = IDENTIFIER;
@@ -107,28 +107,28 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
             }
 
             TokenAdd (&frontend->tokens, token);
-            buf_shift += name_len;
+            buffer_shift += name_len;
         }
 
         // Skip comments
-        else if (buffer[buf_shift] == '#')
+        else if (buffer[buffer_shift] == '#')
         {
-            char* end_of_line = strchr (buffer + buf_shift, '\n');
+            char* end_of_line = strchr (buffer + buffer_shift, '\n');
             if (end_of_line == NULL)
             {
-                *(buffer + buf_shift) = '\n';
+                *(buffer + buffer_shift) = '\n';
             }
 
             else
             {
-                buf_shift = (size_t) (end_of_line - buffer);
+                buffer_shift = (size_t) (end_of_line - buffer);
             }
         }
 
         // Skip spaces
-        else if (isspace (buffer[buf_shift]))
+        else if (isspace (buffer[buffer_shift]))
         {
-            buf_shift += 1;
+            buffer_shift += 1;
         }
 
         // Read keyword (made up of special characters)
@@ -137,27 +137,27 @@ void Tokenization (frontend_t* frontend, char* buffer, size_t buffer_size)
             token_t token = {.type = KEYWORD};
 
             // First try to match a 2-byte keyword combination
-            token.content.keyword = StringToKeyword (buffer + buf_shift, 2);
+            token.content.keyword = StringToKeyword (buffer + buffer_shift, 2);
 
             if (token.content.keyword != UNKNOWN_KEYWORD)
             {
                 TokenAdd (&frontend->tokens, token);
-                buf_shift += 2;
+                buffer_shift += 2;
                 continue;
             }
 
             // If 2-byte match fails, try 1-byte keyword
-            token.content.keyword = StringToKeyword (buffer + buf_shift, 1);
+            token.content.keyword = StringToKeyword (buffer + buffer_shift, 1);
 
             if (token.content.keyword != UNKNOWN_KEYWORD)
             {
                 TokenAdd (&frontend->tokens, token);
-                buf_shift += 1;
+                buffer_shift += 1;
                 continue;
             }
 
             // If no valid keyword is found, this is a syntax error
-            SyntaxError ("%s \"%c\"", "unexpected character", buffer[buf_shift]);
+            SyntaxError ("%s \"%c\"", "unexpected character", buffer[buffer_shift]);
         }
     }
 }

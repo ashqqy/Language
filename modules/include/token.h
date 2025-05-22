@@ -76,7 +76,7 @@ typedef enum token_type
 
 typedef union token_content
 {
-    double       constant;
+    int          constant;
     identifier_t identifier; 
     keyword_t    keyword;
 } token_content_t;
@@ -160,5 +160,7 @@ keyword_t   StringToKeyword (const char* string_begin, size_t string_len);
 const char* KeywordToString (keyword_t keyword);
 
 const char* TypeToString    (token_type_t type);
+
+const char* KeywordEnumToString (keyword_t keyword);
 
 #endif // TOKEN_H

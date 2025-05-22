@@ -26,12 +26,12 @@ int main (const int argc, const char* argv[])
     Tokenization (&frontend, source_code_buffer, source_code_buffer_size);
     FREE (source_code_buffer);
 
-    TokenArrayGraphvizDump (frontend.tokens);
+    // TokenArrayGraphvizDump (frontend.tokens);
 
     size_t shift = 0;
     ast_node_t* ast_root_node = ParseProgram (&frontend.tokens, &shift);
 
-    AstGraphvizDump (ast_root_node);
+    // AstGraphvizDump (ast_root_node);
 
     AstSerialize (stdout, ast_root_node);
 

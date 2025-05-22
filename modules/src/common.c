@@ -38,7 +38,6 @@ char* ReadOpenedFile (FILE* file, size_t* buffer_size)
     if (*buffer_size != file_size)
         return NULL;
 
-
     return buffer;
 }
 
